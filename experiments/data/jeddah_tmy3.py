@@ -1,90 +1,81 @@
 """
 jeddah_tmy3.py
 --------------
-Jeddah TMY3 ambient temperature data (IWEC station 41024).
-Provides 24-hour representative profiles for the four simulation months.
+Jeddah TMY3 (IWEC 41024) representative 24-hour ambient temperature profiles
+for four simulation months. Values match Figure 1 in the paper.
 
-Data source: EnergyPlus Weather Data (IWEC), Jeddah, Saudi Arabia
-Station: IWEC 41024  Lat: 21.68 N  Lon: 39.15 E  Elev: 12 m
-
-Usage:
-    from jeddah_tmy3 import get_hourly_profile, get_daily_mean
+All temperatures in degrees Celsius.
+Time axis: hours 0–24 (hourly resolution, linearly interpolated for 15-min steps).
 """
 
 import numpy as np
-from typing import Dict, List
 
-# 24-hour TMY3 representative profiles (hourly, degrees Celsius)
-# Extracted from EnergyPlus IWEC 41024, averaged over the respective month
-TMY3_PROFILES: Dict[str, List[float]] = {
-    'jan': [19.0, 18.5, 18.0, 18.0, 18.5, 19.0, 20.0, 21.5,
-            23.0, 24.5, 26.0, 27.0, 28.5, 29.0, 29.0, 28.0,
-            26.0, 24.0, 22.5, 21.5, 21.0, 20.5, 20.0, 19.5],
-
-    'apr': [24.0, 23.5, 23.0, 23.0, 24.0, 25.0, 26.5, 28.0,
-            30.0, 32.0, 33.5, 34.5, 35.0, 35.0, 34.5, 33.5,
-            32.0, 30.0, 28.5, 27.5, 27.0, 26.5, 26.0, 25.5],
-
-    'jul': [31.0, 30.0, 29.5, 29.0, 30.0, 31.5, 33.0, 35.5,
-            38.0, 40.5, 42.0, 42.8, 43.0, 43.0, 42.5, 41.5,
-            39.5, 37.5, 36.0, 35.0, 34.0, 33.0, 32.0, 31.5],
-
-    'oct': [27.0, 26.5, 25.5, 25.5, 26.0, 27.0, 28.5, 30.0,
-            32.0, 34.0, 35.5, 36.5, 37.0, 37.0, 36.5, 35.5,
-            33.5, 31.5, 30.0, 29.0, 28.5, 28.0, 27.5, 27.0]
+# ── Representative 24-h profiles (TMY3 data points) ──────────────────────
+PROFILES = {
+    "january": [
+        (0, 19.0), (2, 18.5), (4, 18.0), (6, 18.5), (8, 21.0),
+        (10, 24.0), (12, 27.0), (14, 29.0), (15, 29.0), (16, 28.0),
+        (18, 25.0), (20, 22.0), (22, 20.0), (24, 19.0),
+    ],
+    "april": [
+        (0, 24.0), (2, 23.5), (4, 23.0), (6, 24.0), (8, 27.0),
+        (10, 30.0), (12, 33.0), (14, 35.0), (15, 35.0), (16, 34.0),
+        (18, 31.0), (20, 28.0), (22, 26.0), (24, 24.0),
+    ],
+    "july": [
+        (0, 31.0), (2, 30.0), (4, 29.0), (6, 30.0), (8, 34.0),
+        (10, 38.0), (12, 42.0), (14, 43.0), (15, 42.5), (16, 41.0),
+        (18, 38.0), (20, 35.0), (22, 33.0), (24, 31.0),
+    ],
+    "october": [
+        (0, 27.0), (2, 26.0), (4, 25.5), (6, 26.0), (8, 29.0),
+        (10, 32.0), (12, 35.0), (14, 37.0), (15, 36.5), (16, 35.0),
+        (18, 33.0), (20, 30.0), (22, 28.0), (24, 27.0),
+    ],
 }
 
-# Month aliases
-MONTH_ALIASES = {
-    'january': 'jan', 'february': 'feb', 'march': 'mar',
-    'april':   'apr', 'may':      'may', 'june':  'jun',
-    'july':    'jul', 'august':   'aug', 'september': 'sep',
-    'october': 'oct', 'november': 'nov', 'december':  'dec'
+# Daily mean temperatures (used in worked example, Section 6.2)
+DAILY_MEAN = {
+    "january": 22.0,
+    "april":   28.5,
+    "july":    35.0,   # used in worked example: Ta=35C
+    "october": 30.0,
+}
+
+# Peak afternoon temperatures
+DAILY_PEAK = {
+    "january": 29.0,
+    "april":   35.0,
+    "july":    43.0,   # most severe scheduling challenge
+    "october": 37.0,
 }
 
 
-def get_hourly_profile(month: str) -> np.ndarray:
+def get_profile(month: str, dt_minutes: int = 15) -> np.ndarray:
     """
-    Return 24-hour ambient temperature profile for the given month.
+    Return interpolated temperature profile at dt_minutes resolution.
 
     Args:
-        month: 'jan', 'apr', 'jul', 'oct' (or full name)
+        month:      'january' | 'april' | 'july' | 'october'
+        dt_minutes: control timestep in minutes (default 15)
     Returns:
-        np.ndarray of shape (24,) with hourly Ta values in Celsius
+        np.ndarray of shape (n_steps,) with temperatures in degrees C.
     """
-    key = MONTH_ALIASES.get(month.lower(), month.lower())
-    if key not in TMY3_PROFILES:
-        available = list(TMY3_PROFILES.keys())
-        raise ValueError(f'Month {month!r} not available. Available: {available}')
-    return np.array(TMY3_PROFILES[key])
+    month = month.lower()
+    if month not in PROFILES:
+        raise ValueError(f"Month '{month}' not found. Choose from {list(PROFILES.keys())}")
+
+    pts = PROFILES[month]
+    hours = np.array([p[0] for p in pts], dtype=float)
+    temps = np.array([p[1] for p in pts], dtype=float)
+
+    n_steps = int(24 * 60 / dt_minutes)
+    t_query = np.linspace(0, 24, n_steps, endpoint=False)
+    profile = np.interp(t_query, hours, temps)
+    return profile
 
 
-def get_15min_profile(month: str) -> np.ndarray:
-    """
-    Interpolate hourly profile to 15-minute resolution (96 steps/day).
-
-    Returns:
-        np.ndarray of shape (96,)
-    """
-    hourly = get_hourly_profile(month)
-    xp  = np.arange(24)
-    xnew = np.linspace(0, 23, 96)
-    return np.interp(xnew, xp, hourly)
-
-
-def get_daily_mean(month: str) -> float:
-    """Return the daily mean ambient temperature for the given month."""
-    return float(get_hourly_profile(month).mean())
-
-
-def get_peak_temperature(month: str) -> float:
-    """Return the daily peak ambient temperature for the given month."""
-    return float(get_hourly_profile(month).max())
-
-
-if __name__ == '__main__':
-    print('Jeddah TMY3 Temperature Profiles (IWEC 41024)')
-    for m in ['jan', 'apr', 'jul', 'oct']:
-        profile = get_hourly_profile(m)
-        print(f'  {m.upper():3s}  mean={profile.mean():.1f}C  '
-              f'min={profile.min():.1f}C  max={profile.max():.1f}C')
+if __name__ == "__main__":
+    for month in PROFILES:
+        p = get_profile(month)
+        print(f"{month.capitalize():10s}: mean={p.mean():.1f}C  peak={p.max():.1f}C  steps={len(p)}")

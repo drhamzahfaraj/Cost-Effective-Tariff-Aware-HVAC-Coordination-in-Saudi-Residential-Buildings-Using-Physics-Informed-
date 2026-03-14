@@ -1,147 +1,107 @@
 """
 thermal_params.py
 -----------------
-Building thermal parameters for the 5-zone Saudi villa (Table 1 in paper).
-All values derived from standard RC thermal model calibration.
+Building thermal parameters for the 5-zone Saudi villa and 20-zone compound.
+All values match Table 1 in the paper (Section 6.2).
 
-Units:
-  K_i   : kW/K  (conductance to outdoors)
-  C_i   : kJ/K  (thermal capacitance)
-  K_ij  : kW/K  (inter-zone wall conductance)
-  Q_int : kW    (internal heat gains)
-  Q_cool: kW    (cooling capacity = 5.3 kW = 18,500 BTU / 3.517)
+Zone thermal model (single zone, no coupling):
+    dx_i/dt = (K_i*(Ta - x_i) + Q_int_i + Q_i) / C_i
 
-All zones use 18,500 BTU On/Off split units:
-  Electrical input:  1.8 kW
-  Cooling output:    5.3 kW
-  EER:               10.25 (BTU/Wh)
+AC unit specs (18,500 BTU On/Off split):
+    Electrical draw P_i = 1.8 kW (ON) or 0 (OFF)
+    Cooling output  Q_i = -5.3 kW (ON) or 0 (OFF)
+    EER = 10.25
 """
 
-# 5-zone villa configuration
-VILLA_5Z = {
-    'zones': [
-        {
-            'name':     'Dining Room',
-            'area_m2':  30,
-            'K_i':      0.28,    # kW/K outdoor conductance
-            'C_i':      3600,    # kJ/K thermal mass
-            'Q_int':    0.40,    # kW internal gains (appliances + people)
-            'adjacent': ['Living Room'],
-            'K_ij':     {'Living Room': 0.05}
-        },
-        {
-            'name':     'Living Room',
-            'area_m2':  25,
-            'K_i':      0.25,
-            'C_i':      3000,
-            'Q_int':    0.30,
-            'adjacent': ['Dining Room', 'Master Bedroom'],
-            'K_ij':     {'Dining Room': 0.05, 'Master Bedroom': 0.05}
-        },
-        {
-            'name':     'Master Bedroom',
-            'area_m2':  25,
-            'K_i':      0.24,
-            'C_i':      3000,
-            'Q_int':    0.30,
-            'adjacent': ['Living Room', 'Boys Bedroom'],
-            'K_ij':     {'Living Room': 0.05, 'Boys Bedroom': 0.04}
-        },
-        {
-            'name':     'Boys Bedroom',
-            'area_m2':  20,
-            'K_i':      0.22,
-            'C_i':      2400,
-            'Q_int':    0.25,
-            'adjacent': ['Master Bedroom', 'Girls Bedroom'],
-            'K_ij':     {'Master Bedroom': 0.04, 'Girls Bedroom': 0.04}
-        },
-        {
-            'name':     'Girls Bedroom',
-            'area_m2':  20,
-            'K_i':      0.22,
-            'C_i':      2400,
-            'Q_int':    0.25,
-            'adjacent': ['Boys Bedroom'],
-            'K_ij':     {'Boys Bedroom': 0.04}
-        }
-    ],
-    'ac_specs': {
-        'btu':               18500,
-        'electrical_kw':     1.8,
-        'cooling_kw':        5.3,
-        'eer':               10.25
-    }
-}
+AC_ELECTRICAL_KW = 1.8   # kW input per unit
+AC_COOLING_KW    = 5.3   # kW cooling output per unit
+AC_EER           = 10.25
 
+# ── 5-Zone Villa ──────────────────────────────────────────────────────────
+ZONES_5 = [
+    {
+        "name":    "Dining Room",
+        "area_m2": 30,
+        "K_i":     0.28,   # kW/K  outdoor conductance
+        "C_i":     3600,   # kJ/K  thermal capacity
+        "K_ij":    0.05,   # kW/K  inter-zone conductance
+        "adj":     ["Living Room"],
+        "Q_int":   0.3,    # kW    internal gains
+    },
+    {
+        "name":    "Living Room",
+        "area_m2": 25,
+        "K_i":     0.25,
+        "C_i":     3000,
+        "K_ij":    0.05,
+        "adj":     ["Dining Room", "Master Bedroom"],
+        "Q_int":   0.4,
+    },
+    {
+        "name":    "Master Bedroom",
+        "area_m2": 25,
+        "K_i":     0.24,
+        "C_i":     3000,
+        "K_ij":    0.04,
+        "adj":     ["Living Room", "Boys Bedroom 2"],
+        "Q_int":   0.2,
+    },
+    {
+        "name":    "Boys Bedroom 2",
+        "area_m2": 20,
+        "K_i":     0.22,
+        "C_i":     2400,
+        "K_ij":    0.04,
+        "adj":     ["Master Bedroom", "Girls Bedroom 3"],
+        "Q_int":   0.2,
+    },
+    {
+        "name":    "Girls Bedroom 3",
+        "area_m2": 20,
+        "K_i":     0.22,
+        "C_i":     2400,
+        "K_ij":    0.04,
+        "adj":     ["Boys Bedroom 2"],
+        "Q_int":   0.2,
+    },
+]
 
-def get_params_arrays(config: dict = VILLA_5Z) -> dict:
+# ── 20-Zone Compound ──────────────────────────────────────────────────────
+# Four identical 5-zone villas scaled by compound adjacency.
+# Zones 0-4: Villa A, 5-9: Villa B, 10-14: Villa C, 15-19: Villa D
+import copy
+
+def build_compound_20z():
+    """Return 20-zone parameter list by replicating 5-zone villa x4."""
+    compound = []
+    villa_names = ["A", "B", "C", "D"]
+    for idx, villa in enumerate(villa_names):
+        for zone in copy.deepcopy(ZONES_5):
+            zone["name"] = f"Villa {villa} - {zone['name']}"
+            compound.append(zone)
+    return compound
+
+ZONES_20 = build_compound_20z()
+
+# ── Comfort bounds ─────────────────────────────────────────────────────────
+COMFORT_STRICT   = (23.0, 25.0)   # [l, h] degrees C
+COMFORT_EXTENDED = (22.0, 26.0)   # [l', h'] degrees C
+
+# ── Theoretical asymptotes (July, Living Room) ─────────────────────────────
+# ON:  b+/a+ = (K_i*Ta + Q_int + Q_cooling) / K_i ≈ 15.0 C
+# OFF: b-/a- = (K_i*Ta + Q_int) / K_i             ≈ 36.2 C
+ASYMP_ON_C  = 15.0
+ASYMP_OFF_C = 36.2
+
+# ── Minimum utilization (Section 4.2) ─────────────────────────────────────
+def min_utilization(a_minus, b_minus, a_plus, b_plus, h):
     """
-    Convert zone config dict to flat numpy-ready arrays for simulation.
-
-    Returns:
-        dict with keys: K, C, Q_int, K_ij_matrix, zone_names
+    d_i = (a_minus*h - b_minus) / ((a_minus*h - b_minus) - (a_plus*h - b_plus))
+    Eq. (7) in the paper.
     """
-    import numpy as np
-    zones = config['zones']
-    n = len(zones)
-    zone_names = [z['name'] for z in zones]
-    name_to_idx = {name: i for i, name in enumerate(zone_names)}
+    num = a_minus * h - b_minus
+    den = num - (a_plus * h - b_plus)
+    return num / den
 
-    K     = np.array([z['K_i']   for z in zones])
-    C     = np.array([z['C_i']   for z in zones])
-    Q_int = np.array([z['Q_int'] for z in zones])
-
-    # Inter-zone coupling matrix
-    K_ij = np.zeros((n, n))
-    for i, z in enumerate(zones):
-        for adj_name, k_val in z.get('K_ij', {}).items():
-            j = name_to_idx.get(adj_name)
-            if j is not None:
-                K_ij[i, j] = k_val
-                K_ij[j, i] = k_val  # symmetric
-
-    return {
-        'K':          K,
-        'C':          C,
-        'Q_int':      Q_int,
-        'K_ij':       K_ij,
-        'zone_names': zone_names
-    }
-
-
-def get_scaled_params(n_zones: int) -> dict:
-    """
-    Generate thermal parameters for n_zones compound
-    by replicating the villa unit cell.
-    Used for scalability experiments (Table 4 in paper).
-    """
-    import numpy as np
-    base = get_params_arrays(VILLA_5Z)
-    n_reps = (n_zones + 4) // 5
-
-    K     = np.tile(base['K'],     n_reps)[:n_zones]
-    C     = np.tile(base['C'],     n_reps)[:n_zones]
-    Q_int = np.tile(base['Q_int'], n_reps)[:n_zones]
-
-    # Block-diagonal coupling matrix
-    K_ij = np.zeros((n_zones, n_zones))
-    for rep in range(n_reps):
-        start = rep * 5
-        end   = min(start + 5, n_zones)
-        size  = end - start
-        K_ij[start:end, start:end] = base['K_ij'][:size, :size]
-
-    return {'K': K, 'C': C, 'Q_int': Q_int, 'K_ij': K_ij}
-
-
-if __name__ == '__main__':
-    import numpy as np
-    p = get_params_arrays()
-    print('5-Zone Villa Thermal Parameters')
-    print('Zone Names:', p['zone_names'])
-    print('K  (kW/K):', p['K'])
-    print('C  (kJ/K):', p['C'])
-    print('Q_int(kW):', p['Q_int'])
-    print('K_ij matrix (kW/K):')
-    print(np.round(p['K_ij'], 3))
+# Strict range:   d_i ≈ 0.48   (h=25)
+# Extended range: d_i ≈ 0.30   (h=26)  → 36.9% reduction

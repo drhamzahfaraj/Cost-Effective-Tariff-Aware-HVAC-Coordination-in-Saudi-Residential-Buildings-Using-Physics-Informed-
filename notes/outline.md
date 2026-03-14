@@ -1,66 +1,85 @@
-# Paper Outline — PI-PPO for Saudi HVAC Peak Demand Reduction
+# Paper Outline — PI-PPO for Saudi HVAC Scheduling
 
 **Target journal:** Applied Energy  
-**Author:** Hamzah Faraj, Taif University  
-**Status:** Under Review
+**Status:** Under Review  
+**Version:** main-13 (final submission)
 
 ---
 
 ## Section Map
 
-| # | Section | Key Contribution | Status |
-|---|---|---|---|
-| 1 | Introduction | Problem framing: 2-tier tariff + On/Off units | ✅ Done |
-| 1.1 | Why Wider Comfort Reduces Peak | 36.9% utilization reduction theorem | ✅ Done |
-| 2 | Related Work | Saudi energy, DRL-HVAC, PIML, scheduling | ✅ Done |
-| 3 | System Model | Heat balance Eq.1, tariff Eq.3, inter-zone coupling | ✅ Done |
-| 4 | Task Model & Feasibility | Min utilization Eq.7, infeasibility condition | ✅ Done |
-| 5 | Scheduling Controller | Lazy scheduling baseline formulation | ✅ Done |
-| 6 | PI-PPO Methodology | Reward Eq.9, network arch, top-k projection | ✅ Done |
-| 7 | Experimental Setup | EnergyPlus 23.2, Sinergym, Jeddah TMY3, 5-zone villa | ✅ Done |
-| 8 | Results & Discussion | Tables 2–5, ablation, scalability | ✅ Done |
-| 9 | Conclusion | Summary + 5 future directions | ✅ Done |
+| § | Title | Key Content |
+|---|---|---|
+| 1 | Introduction | Problem motivation, two-tier tariff, gap analysis, contributions |
+| 1.1 | Why Comfort Extension Reduces Peak | d_i derivation intuition, ASHRAE support |
+| 2 | Related Work | Saudi energy, DRL-HVAC, PIML, scheduling |
+| 3 | System Model | Heat balance Eq.(1), inter-zone coupling K_ij, tariff Eq.(3) |
+| 4 | Task Model & Feasibility | Task abstraction, ODE solution Eq.(4-6), d_i formula Eq.(7) |
+| 5 | Scheduling Controller | Lazy baseline, coupled system dynamics Eq.(8) |
+| 6 | Proposed Methodology: PI-PPO | State, action, reward Eq.(9), PPO training, NN surrogate |
+| 7 | Experimental Setup | EnergyPlus 23.2, Sinergym, 5-zone villa Table 1, worked example |
+| 8 | Results & Discussion | Year-round, full baseline, comfort ext., ablation, lit. compare, scalability, waterfall |
+| 9 | Conclusion | Summary, future work |
 
 ---
 
-## Core Arguments Chain
+## Key Claims & Supporting Evidence
 
-1. **Problem:** On/Off split ACs in Saudi villas synchronize → peak spike → 2-tier tariff breach
-2. **Gap:** MPC doesn't scale; DRL ignores physics + tiered tariff; PINN targets demand-charge tariffs
-3. **Solution:** PI-PPO = stationary policy + physics reward + inter-zone coupling + tariff tracking
-4. **Key insight:** Comfort extension [23-25] → [22-26]°C reduces min utilization by 36.9%, enabling k=2 vs k=3
-5. **Validation:** EnergyPlus simulation, 4 seasons, 5→100 zones, full ablation
+### Claim 1: PI-PPO reduces peak demand by 40–60%
+- Table 2 (5-zone): P_peak 9.0 → 3.6–5.4 kW
+- Table 3 (20-zone): P_peak 36.0 → 7.2–18.0 kW
 
----
+### Claim 2: Near-zero comfort violations guaranteed
+- Table 4: PI-PPO Viol. = 0.00°C vs DQN 0.14°C, PPO 0.05°C
+- Physics reward r_physics enforces heat balance consistency
 
-## Novelty Claims (vs. Related Work)
+### Claim 3: Comfort extension adds 14.0 pp (36.9% d_i reduction)
+- d_i(h=25) = 0.48 → d_i(h=26) = 0.30 → Δ = 36.9%
+- k: 3→2 (5-zone), 10→7 (20-zone)
+- Table 5: 22.5% → 31.9% (5-zone July), 33.0% → 47.0% (20-zone July)
 
-- First to target **Saudi two-tier (kWh) tariff** (not demand-charge $/kW)
-- First **stationary infinite-horizon** policy for multi-zone On/Off coordination
-- Formal **feasibility analysis** with minimum utilization theorem
-- **Inter-zone coupling** exploited for thermal buffering (2.4 pp from coupling alone)
-- **Near-zero comfort violations** (≤0.02°C) — absent from standard DRL
+### Claim 4: Sub-linear scaling (<0.04 s at 100 zones)
+- Table 7: GS=17 s, PI-PPO=0.04 s at 100 zones
 
----
-
-## Ablation Attribution (20-zone, July)
-
-| Component | Contribution |
-|---|---|
-| Scheduling coordination (GS) | 20.9 pp |
-| PPO learning | 4.0 pp |
-| Tariff awareness | 4.2 pp |
-| Physics reward | 1.9 pp |
-| Inter-zone coupling | 2.4 pp |
-| Comfort extension | 15.8 pp |
-| **Total PI-PPO** | **49.2 pp** |
+### Claim 5: Ablation attribution
+- 6.0 pp: physics reward r_physics
+- 4.5 pp: tiered-tariff awareness r_tariff
+- 4.0 pp: PPO policy learning
+- 2.0 pp: inter-zone coupling K_ij
+- 14.0 pp: comfort extension
 
 ---
 
-## Open Items / Future Work
+## Equations Checklist
 
-- [ ] Sim-to-real deployment in Saudi villas (online C_i, K_i, K_ij estimation)
-- [ ] Time-of-use pricing under Vision 2030 smart-grid
-- [ ] Rooftop PV + battery integration (0.07 SAR/kWh feed-in tariff)
-- [ ] Occupant field study for 22–26°C acceptance in Saudi households
-- [ ] Extension to inverter-driven variable-speed units (continuous action space)
+- [x] Eq.(1): Heat balance with inter-zone coupling
+- [x] Eq.(2): Single-zone simplified dynamics
+- [x] Eq.(3): Saudi two-tier tariff bill formula
+- [x] Eq.(4): Task dynamics (ON/OFF ODE)
+- [x] Eq.(5): Temperature rise solution (OFF phase)
+- [x] Eq.(6): Temperature fall solution (ON phase)
+- [x] Eq.(7): Minimum utilization d_i
+- [x] Eq.(8): Coupled system dynamics
+- [x] Eq.(9): Physics-informed reward r(t)
+
+---
+
+## Figures Checklist
+
+- [x] Fig. 1: Jeddah 24-h ambient temperature profiles (4 months, TikZ)
+- [x] Fig. 2: Cooling task dynamics — strict vs extended comfort ranges (TikZ)
+- [x] Fig. 3: PI-PPO architecture diagram (TikZ)
+
+---
+
+## Tables Checklist
+
+- [x] Table 1: 5-zone villa specifications
+- [x] Table 2: Year-round results, 5-zone villa
+- [x] Table 3: Year-round results, 20-zone compound
+- [x] Table 4: Full baseline comparison, 5-zone July
+- [x] Table 5: Comfort extension comparison
+- [x] Table 6: Ablation study
+- [x] Table 7: Literature comparison
+- [x] Table 8: Scalability
+- [x] Table 9: Waterfall decomposition
