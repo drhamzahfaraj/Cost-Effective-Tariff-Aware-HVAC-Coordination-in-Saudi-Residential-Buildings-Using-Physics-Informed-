@@ -1,0 +1,9 @@
+method,bill_SAR,reduction_pct,e_tot_kWh,p_peak_kW,max_violation_C,notes
+On-Off,711,0.0,3950,9.0,0.00,Independent thermostatic
+MPC-1,658,7.5,3660,7.2,0.00,1-step finite horizon
+MPC-3,634,10.8,3520,5.4,0.00,3-step horizon (infeasible >20 zones)
+GS (lazy),621,12.7,3450,5.4,0.00,Lazy scheduling baseline
+DQN,602,15.3,3350,5.4,0.14,Standard reward - comfort violations present
+PPO (standard),590,17.0,3280,5.4,0.00,No physics / no tariff awareness
+PI-PPO (no coupling),567,20.2,3150,5.4,0.00,Physics reward but no inter-zone coupling
+PI-PPO (coupled),550,22.6,3060,5.4,0.00,Full model - proposed method
