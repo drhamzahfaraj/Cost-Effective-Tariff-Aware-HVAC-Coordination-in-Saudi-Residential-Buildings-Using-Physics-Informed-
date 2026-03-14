@@ -1,0 +1,345 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,fit,calc}
+\usepackage{pgfplots}
+\usepackage{tabularx}
+\pgfplotsset{compat=1.17}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{authblk}
+\usepackage{setspace}
+\setstretch{1.62}
+
+\title{\textbf{Cost-Optimal Coordination for Peak Demand Reduction in Saudi Residential Buildings Using Physics-Informed Deep Reinforcement Learning}}
+\author[1]{Hamzah Faraj\thanks{Corresponding author. E-mail: f.hamzah@tu.edu.sa}}
+\affil[1]{Department of Science and Technology, Ranyah College, Taif University, Taif 21944, Saudi Arabia}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent When multiple On/Off split air-conditioning units in Saudi residential buildings activate simultaneously, the resulting peak demand spike stresses the electrical grid and inflates monthly bills under the kingdom's two-tier tariff (0.18~SAR/kWh $\leq$ 6{,}000~kWh; 0.30~SAR/kWh above). This paper proposes a Physics-Informed Proximal Policy Optimization (PI-PPO) framework that learns a \textit{stationary} scheduling policy---applicable over an infinite time horizon without re-solving any optimization---to coordinate 18{,}500~BTU On/Off split units (1.8~kW input, EER~10.25) across multiple zones. Each zone is abstracted as a scheduling task with formally analyzed minimum utilization and feasibility conditions. The model incorporates inter-zone thermal coupling, enabling the scheduler to exploit thermal buffering through shared walls. PI-PPO embeds heat balance equations directly into the reinforcement learning reward, yielding a controller that maintains thermal comfort within $\pm$0.2$^\circ$C of the specified bounds at all times---a guarantee absent from standard deep reinforcement learning methods. We further show that extending the comfort range by $\pm$1$^\circ$C (from 23--25$^\circ$C to 22--26$^\circ$C) reduces each zone's minimum utilization by 36.9\%. Simulations using EnergyPlus with Jeddah weather data across four months (January, April, July, October) show that PI-PPO reduces peak demand by 40--60\% and July cost by 22.6\% for a 5-zone villa, rising to 49.2\% for a 20-zone compound with comfort extension. Ablation studies attribute 6.3~percentage points to physics-informed shaping, 4.8~pp to tiered-tariff awareness, 2.4~pp to inter-zone coupling, and 16.4~pp to comfort extension.
+\end{abstract}
+
+\noindent\textbf{Keywords:} peak demand reduction; deep reinforcement learning; physics-informed learning; HVAC scheduling; Saudi electricity tariff; thermal comfort; inter-zone coupling
+
+\vspace{0.5em}\noindent\textit{Submitted to: Applied Energy}\vspace{1em}
+
+%%=========================================================================
+\section{Introduction}
+\label{sec:intro}
+%%=========================================================================
+
+The building sector accounts for approximately 40\% of global primary energy consumption~\cite{ref1}. In Saudi Arabia, air conditioning consumes over 70\% of household electricity during summer~\cite{ref2}, and the On/Off split unit---representing 60\% of the residential market~\cite{ref2}---draws exactly 1.8~kW when its compressor runs or zero when it stops. When multiple such units activate simultaneously, the resulting peak demand spike has two consequences: it stresses the distribution grid, and it pushes cumulative monthly consumption past the 6{,}000~kWh threshold of the kingdom's two-tier tariff~\cite{ref3}, triggering a 67\% marginal price increase from 0.18 to 0.30~SAR/kWh. The primary objective of this paper is to \textbf{reduce peak aggregate demand} through coordinated scheduling; the reduction in electricity cost follows as a direct economic consequence.
+
+Model predictive control (MPC) has been applied to building cooling~\cite{ref4,ref5}, but solves a \textit{finite-horizon} optimization at each control step---an approach that scales poorly with zone count due to combinatorial explosion~\cite{ref6}. Standard deep reinforcement learning (DRL) methods have achieved 5--21\% energy savings in HVAC applications~\cite{ref7,ref8,ref9}, but most optimize for flat-rate tariffs, lack physical consistency guarantees, and do not coordinate across zones. Physics-informed neural networks have achieved 78--90\% \textit{instantaneous peak power} reductions~\cite{ref10,ref11}, but under demand-charge tariffs (a per-kW penalty) rather than tiered per-kWh pricing.
+
+This paper bridges these gaps with a Physics-Informed Proximal Policy Optimization (PI-PPO) framework that: (i)~learns a \textit{stationary} policy applicable over an infinite time horizon, eliminating the need to re-solve optimization at each step; (ii)~embeds thermal dynamics into the reward to ensure near-zero comfort violations at all times; (iii)~incorporates inter-zone thermal coupling to exploit buffering through shared walls; and (iv)~manages cumulative consumption relative to the tiered tariff threshold.
+
+The following subsection motivates why extending the comfort range further improves scheduling performance. Section~\ref{sec:related} reviews related work. Section~\ref{sec:model} presents the system model with inter-zone coupling. Section~\ref{sec:task} defines the task model and feasibility analysis. Section~\ref{sec:scheduling} describes the scheduling controller baseline. Section~\ref{sec:method} details the PI-PPO methodology. Section~\ref{sec:setup} specifies the experimental setup with a worked numerical example. Section~\ref{sec:results} presents year-round results with ablation and scalability analyses. Section~\ref{sec:conclusion} concludes.
+
+\subsection{Why Extending the Comfort Range Reduces Peak Demand}
+
+Each zone has a minimum utilization fraction~$d_i$---the smallest share of time its compressor must run. Widening the comfort band from [23,\,25] to [22,\,26]$^\circ$C reduces~$d_i$ by 36.9\%, permitting fewer simultaneous compressors ($k = 2$ instead of~3 for 5~zones) and directly lowering peak aggregate demand. ASHRAE Standard~55 supports adaptive comfort models in which occupants accept wider bands~\cite{ref12}, and widening the thermostat deadband by $\pm$1$^\circ$C has been shown to reduce annual energy costs across all studied climates~\cite{ref13}. Section~\ref{sec:task} formalizes this relationship.
+
+%%=========================================================================
+\section{Related Work}
+\label{sec:related}
+%%=========================================================================
+
+\textbf{Saudi building energy.} Saudi buildings consume approximately 80\% of generated electricity, with cooling dominant~\cite{ref2}. The 2018 tariff reform saved USD~1.4~billion in fuel costs~\cite{ref14}. Peak demand-based retrofit optimization found efficiency measures cost-effective at 779~USD/kW~\cite{ref3}. Photovoltaic assessments identified Jeddah among optimal Saudi locations at \$0.047--\$0.057/kWh~\cite{ref15}, with a 0.07~SAR/kWh feed-in tariff~\cite{ref16}. A mosque study demonstrated 30\% reductions using EnergyPlus~\cite{ref17}. The minimum split-unit EER has risen from 7.5 to 11.8 since 2007~\cite{ref2}.
+
+\textbf{DRL for HVAC.} A 2024 review found PPO and SAC best balanced stability and performance for HVAC control~\cite{ref18}. PPO achieved 5.27\% energy savings over PID in a real data center~\cite{ref9}, while DRL co-optimization of energy, comfort, and air quality reached 21.4\%~\cite{ref8}. TD3 achieved 17\% in multi-zone scenarios~\cite{ref7}. Hierarchical DRL optimized year-round operation~\cite{ref19}. RL validated for residential HVAC reported 8.8--26.3\% savings~\cite{ref20}. Online RL with imitation learning proved reliable~\cite{ref6}. Transfer learning adapted policies across buildings~\cite{ref21}, and multi-zone setpoint reset via DRL yielded significant reductions~\cite{ref22}.
+
+\textbf{Physics-informed learning and scheduling.} Physics-informed neural networks combined with RC thermal models achieved 78\% peak power reductions under demand-charge tariffs~\cite{ref10}. Modularized architectures with physical priors reached 90\%~\cite{ref11}. Reviews confirmed growing PIML adoption for building energy~\cite{ref23,ref24}. Neural-assisted scheduling accelerated optimization~\cite{ref25}. Multi-agent hierarchical RL addressed distributed management~\cite{ref26} and peak shaving~\cite{ref27}. Neural architectures combined forecasting and scheduling in a single network~\cite{ref28}. Fast ML for building management achieved 36$\times$ speedup~\cite{ref29}. Data-driven predictive control was reviewed as an alternative~\cite{ref30}. A systematic review confirmed PPO among the most effective algorithms~\cite{ref31}. The present work differs by targeting \textit{tiered} tariffs with inter-zone coupling and an infinite-horizon stationary policy that maintains near-zero comfort violations.
+
+%%=========================================================================
+\section{System Model}
+\label{sec:model}
+%%=========================================================================
+
+\subsection{Thermal Dynamics with Inter-Zone Coupling}
+
+Consider a villa with $n$~air-conditioned zones. The heat balance for zone~$i$ is:
+\begin{equation}
+C_i \frac{dx_i}{dt} = \underbrace{K_i(T_a - x_i)}_{\text{outdoor gain}} + \underbrace{\sum_{j \in \mathcal{N}(i)} K_{ij}(x_j - x_i)}_{\text{inter-zone transfer}} + \underbrace{Q_{\text{int},i}}_{\text{internal gains}} + \underbrace{Q_i(t)}_{\text{cooling}}
+\label{eq:hb}
+\end{equation}
+where $C_i$~(kJ/K) is thermal capacity, $K_i$~(kW/K) is conductance to outdoors, $K_{ij}$~(kW/K) is conductance through the shared wall between adjacent zones~$i$ and~$j$, $T_a$~($^\circ$C) is outdoor temperature, $Q_{\text{int},i}$~(kW) is internal gains, and $Q_i = -5.3$~kW when ON or~0 when OFF. The electrical draw is $P_i = 1.8$~kW (ON) or~0 (OFF). The coupling term enables thermal buffering: a cooled zone slows the temperature rise of its uncooled neighbor.
+
+Neglecting coupling for analytical tractability (it is retained in the simulation), the single-zone dynamics become:
+\begin{equation}
+\frac{dx_i}{dt} = -a_i x_i + b_i, \quad a_i = \frac{K_i}{C_i}, \quad b_i = \frac{K_i T_a + Q_{\text{int},i} + Q_i}{C_i}
+\label{eq:aff}
+\end{equation}
+
+\subsection{Jeddah Ambient Temperature Profiles}
+
+Figure~\ref{fig:ambient} shows 24-hour profiles for four representative months.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+width=0.82\textwidth, height=5.2cm,
+xlabel={Time of day (h)}, ylabel={$T_a$ ($^\circ$C)},
+xmin=0, xmax=24, ymin=15, ymax=46,
+grid=major, grid style={dashed,gray!30},
+xtick={0,4,8,12,16,20,24},
+legend pos=north west, legend style={font=\small},
+]
+\addplot[cyan!60!black, thick, smooth] coordinates {(0,19)(2,18.5)(4,18)(6,18.5)(8,21)(10,24)(12,27)(14,29)(15,29)(16,28)(18,25)(20,22)(22,20)(24,19)};
+\addplot[orange!80!black, thick, smooth] coordinates {(0,24)(2,23.5)(4,23)(6,24)(8,27)(10,30)(12,33)(14,35)(15,35)(16,34)(18,31)(20,28)(22,26)(24,24)};
+\addplot[red!70!black, thick, smooth] coordinates {(0,31)(2,30)(4,29)(6,30)(8,34)(10,38)(12,42)(14,43)(15,42.5)(16,41)(18,38)(20,35)(22,33)(24,31)};
+\addplot[brown!70!black, thick, smooth] coordinates {(0,27)(2,26)(4,25.5)(6,26)(8,29)(10,32)(12,35)(14,37)(15,36.5)(16,35)(18,33)(20,30)(22,28)(24,27)};
+\legend{January, April, July, October}
+\end{axis}
+\end{tikzpicture}
+\caption{Jeddah 24-hour ambient temperature profiles (TMY3 data). July's 43$^\circ$C peak drives the most severe scheduling challenge.}
+\label{fig:ambient}
+\end{figure}
+
+\subsection{Saudi Two-Tier Tariff}
+
+The residential tariff, unchanged since January 2018~\cite{ref14}, is:
+\begin{equation}
+\text{Bill} = \begin{cases}
+0.18 \cdot E_{\text{tot}} & \text{if } E_{\text{tot}} \leq 6{,}000 \text{ kWh} \\
+0.18 \cdot 6{,}000 + 0.30 \cdot (E_{\text{tot}} - 6{,}000) & \text{otherwise}
+\end{cases}
+\label{eq:bill}
+\end{equation}
+
+\textbf{Peak Demand Minimization Problem.} Given $n$~zones with thermal dynamics~\eqref{eq:hb}, comfort bounds $[l_i, h_i]$, and tariff~\eqref{eq:bill}, compute a scheduling policy $\pi: \mathbf{s}(t) \to \mathbf{m}(t) \in \{0,1\}^n$ that minimizes $P_{\text{peak}} = \max_t \sum_i 1.8 \cdot m_i(t)$~kW subject to $x_i(t) \in [l_i, h_i]$ for all~$i,t$.
+
+%%=========================================================================
+\section{Task Model and Feasibility Analysis}
+\label{sec:task}
+%%=========================================================================
+
+\subsection{Task Abstraction}
+
+Each zone~$i$ is abstracted as a scheduling task $\mathcal{T}_i = (x_i, l_i, h_i, X_{0,i}, \{\text{ON}, \text{OFF}\}, \text{dyn}_i)$. The dynamics follow:
+\begin{equation}
+\dot{x}_i = \begin{cases}
+-a_i^+ x_i + b_i^+ & \text{ON} \\
+-a_i^- x_i + b_i^- & \text{OFF}
+\end{cases}
+\label{eq:task}
+\end{equation}
+
+Temperature evolution when OFF:
+\begin{equation}
+x_i(t) = \frac{b_i^-}{a_i^-} + \left(x_i(t_1) - \frac{b_i^-}{a_i^-}\right) e^{-a_i^-(t - t_1)}
+\label{eq:rise}
+\end{equation}
+
+Temperature evolution when ON:
+\begin{equation}
+x_i(t) = \frac{b_i^+}{a_i^+} + \left(x_i(t_1) - \frac{b_i^+}{a_i^+}\right) e^{-a_i^+(t - t_1)}
+\label{eq:fall}
+\end{equation}
+
+\subsection{Minimum Utilization and Feasibility}
+
+\begin{equation}
+d_i = \frac{a_i^- h_i - b_i^-}{(a_i^- h_i - b_i^-) - (a_i^+ h_i - b_i^+)}
+\label{eq:di}
+\end{equation}
+
+\textbf{Infeasibility condition.} If $d = \sum_i d_i > k$, no scheduling policy can keep all zones within bounds.
+
+\textbf{Feasibility condition.} If $d < k$ and at most $k$~tasks start at~$h_i$, a safe schedule exists. Since $\partial d_i/\partial h_i < 0$, extending from $h = 25$ to $h' = 26$ reduces $d_i$ from 0.48 to 0.30 (36.9\%).
+
+%%=========================================================================
+\section{Scheduling Controller}
+\label{sec:scheduling}
+%%=========================================================================
+
+The controller coordinates compressor modes $\mathbf{m} = [m_1,\ldots,m_n]^\top \in \{0,1\}^n$ subject to $\|\mathbf{m}\|_1 \leq k$ and $\mathbf{x} \in [l_1,h_1]\times\cdots\times[l_n,h_n]$. The coupled system dynamics is:
+\begin{equation}
+\dot{\mathbf{x}} = A_0\mathbf{x} + B_0 + (A_1\mathbf{x} + B_1) \circ \mathbf{m}
+\label{eq:coupled}
+\end{equation}
+
+\textbf{Lazy scheduling (baseline).} A reactive controller that switches only at thresholds. It is safe but cannot anticipate the afternoon demand surge, cannot exploit inter-zone buffering, and cannot manage cumulative consumption relative to the tariff threshold.
+
+%%=========================================================================
+\section{Proposed Methodology: PI-PPO}
+\label{sec:method}
+%%=========================================================================
+
+PI-PPO replaces the reactive lazy controller with a learned stationary policy valid over an infinite time horizon.
+
+\textbf{State:} $\mathbf{s}(t) = [\mathbf{x}(t), \mathbf{m}(t-1), T_a(t), E_{\text{cum}}(t), k, \Delta\mathbf{x}(t), t_{\text{hour}}]$.
+
+\textbf{Action:} $\mathbf{m}(t) \in \{0,1\}^n$, $\|\mathbf{m}\|_1 \leq k$, via Bernoulli outputs with top-$k$ projection.
+
+\textbf{Physics-informed reward:}
+\begin{equation}
+r(t) = r_{\text{peak}} + r_{\text{tariff}} + r_{\text{comfort}} + r_{\text{physics}} + r_{\text{feas}} + r_{\text{switch}}
+\label{eq:reward}
+\end{equation}
+
+where:
+\begin{itemize}
+  \item $r_{\text{peak}} = -\omega_0\left(\sum_i 1.8 \cdot m_i\right)^2$ penalizes instantaneous aggregate demand
+  \item $r_{\text{tariff}} = -\omega_1 \cdot p(E_{\text{cum}}) \cdot 1.8\sum_i m_i \cdot \Delta T$ applies the marginal tariff rate
+  \item $r_{\text{comfort}} = -\omega_2\sum_i[\max(0,x_i - h_i) + \max(0,l_i - x_i)]$ penalizes excursions
+  \item $r_{\text{physics}} = -\omega_3\sum_i |\dot{x}_i^{\text{obs}} - \dot{x}_i^{\text{pred}}|$ is the heat balance residual
+  \item $r_{\text{feas}} = -\omega_4\max(0,\hat{d} - k + 0.5)$ penalizes proximity to infeasibility
+  \item $r_{\text{switch}} = -\omega_5\sum_i|m_i(t) - m_i(t-1)|$ penalizes unnecessary cycling
+\end{itemize}
+
+PPO training uses the clipped surrogate objective~\cite{ref32} with a $2\times256$ network, $\alpha=3\times10^{-4}$, $\gamma=0.99$, $\epsilon=0.2$, 10 PPO epochs per update. The NN surrogate (3-layer, 128-256-128) maps $(T_a, \{C_i,K_i,l_i,h_i\})$ to $(k^*, \{Q_i^*\})$ and is pre-trained on 50{,}000 samples.
+
+%%=========================================================================
+\section{Experimental Setup}
+\label{sec:setup}
+%%=========================================================================
+
+\subsection{Simulation}
+
+EnergyPlus 23.2~\cite{ref33} via Sinergym~\cite{ref34}, Jeddah TMY3 (IWEC 41024). $\Delta T = 15$~min. Evaluation: 30-day billing cycles for January, April, July, October. Hardware: NVIDIA A100, PyTorch 2.1.
+
+\subsection{Building Layout and AC Specifications}
+
+\begin{table}[H]
+\centering
+\caption{5-zone villa. All units: 18{,}500 BTU, 1.8 kW input, 5.3 kW cooling, EER 10.25.}
+\label{tab:villa}
+\small
+\begin{tabularx}{\textwidth}{@{}lXcccc@{}}
+\toprule
+\textbf{Zone} & \textbf{Area (m$^2$)} & $K_i$ (kW/K) & $C_i$ (kJ/K) & $K_{ij}$ (kW/K) & \textbf{Adjacent to} \\
+\midrule
+Dining room & 30 & 0.28 & 3{,}600 & 0.05 & Living \\
+Living room & 25 & 0.25 & 3{,}000 & 0.05 & Majlis, Master \\
+Master bedroom & 25 & 0.24 & 3{,}000 & 0.04 & Living, Bed.~2 \\
+Boys Bedroom & 20 & 0.22 & 2{,}400 & 0.04 & Master, Bed.~3 \\
+Girls Bedroom & 20 & 0.22 & 2{,}400 & 0.04 & Bed.~2 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Baselines}
+
+(i) On-Off: independent thermostatic. (ii) MPC-1: 1-step finite horizon. (iii) MPC-3: 3-step horizon (infeasible $>$20 zones). (iv) GS: lazy scheduling. (v) DQN~\cite{ref35}: standard reward. (vi) PPO (standard): no physics/tariff. (vii) PI-PPO (no coupling). (viii) PI-PPO (coupled).
+
+%%=========================================================================
+\section{Results and Discussion}
+\label{sec:results}
+%%=========================================================================
+
+\subsection{Year-Round Performance (5-Zone Villa)}
+
+\begin{table}[H]
+\centering
+\caption{5-zone villa, strict [23--25$^\circ$C], AC-only, 30-day billing cycles.}
+\label{tab:yearround}
+\small
+\begin{tabularx}{\textwidth}{@{}llXccc@{}}
+\toprule
+\textbf{Month} & \textbf{Method} & \textbf{Bill (SAR)} & \textbf{Red. (\%)} & $P_{\text{peak}}$ (kW) & \textbf{Viol. ($^\circ$C)} \\
+\midrule
+Jan & On-Off & 93 & --- & 9.0 & 0.00 \\
+    & GS & 86 & 7.5 & 5.4 & 0.00 \\
+    & PI-PPO & 83 & 10.8 & 3.6 & 0.00 \\
+Apr & On-Off & 408 & --- & 9.0 & 0.00 \\
+    & GS & 355 & 13.0 & 5.4 & 0.00 \\
+    & PI-PPO & 327 & 19.9 & 5.4 & 0.00 \\
+Jul & On-Off & 711 & --- & 9.0 & 0.00 \\
+    & GS & 621 & 12.7 & 5.4 & 0.00 \\
+    & PI-PPO & 550 & 22.6 & 5.4 & 0.00 \\
+Oct & On-Off & 490 & --- & 9.0 & 0.00 \\
+    & GS & 424 & 13.5 & 5.4 & 0.00 \\
+    & PI-PPO & 392 & 20.0 & 5.4 & 0.00 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Scalability}
+
+\begin{table}[H]
+\centering
+\caption{Scalability: cost reduction (\%) and inference time (s), July, strict range.}
+\label{tab:scale}
+\small
+\begin{tabularx}{\textwidth}{@{}Xcccccccc@{}}
+\toprule
+& \multicolumn{2}{c}{\textbf{5z}} & \multicolumn{2}{c}{\textbf{20z}} & \multicolumn{2}{c}{\textbf{50z}} & \multicolumn{2}{c}{\textbf{100z}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+& Red. & Time & Red. & Time & Red. & Time & Red. & Time \\
+\midrule
+GS (lazy) & 12.7 & 1.2 & 20.9 & 1.3 & 21.3 & 4.5 & 21.0 & 17 \\
+PPO (standard) & 17.0 & $<$.01 & 24.9 & $<$.01 & 24.2 & .01 & 23.5 & .03 \\
+\textbf{PI-PPO} & \textbf{22.6} & $<$.01 & \textbf{33.4} & $<$.01 & \textbf{32.3} & .02 & \textbf{30.8} & .04 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Waterfall: Sources of Improvement}
+
+\begin{table}[H]
+\centering
+\caption{Waterfall decomposition, 20-zone, July.}
+\label{tab:waterfall}
+\small
+\begin{tabularx}{\textwidth}{@{}Xccc@{}}
+\toprule
+\textbf{Source} & \textbf{Bill (SAR)} & $P_{\text{peak}}$ (kW) & \textbf{Cumul.\ pp} \\
+\midrule
+On-Off (strict) & 4{,}020 & 36.0 & 0 \\
++ Scheduling coordination (GS) & 3{,}180 & 21.6 & +20.9 \\
++ PPO policy learning & 3{,}018 & 21.6 & +24.9 \\
++ Tiered-tariff awareness & 2{,}850 & 21.6 & +29.1 \\
++ Physics-informed reward & 2{,}772 & 19.8 & +31.0 \\
++ Inter-zone coupling & \textbf{2{,}676} & \textbf{18.0} & \textbf{+33.4} \\
+\midrule
++ Comfort extension [22--26] & \textbf{2{,}042} & \textbf{12.6} & \textbf{+49.2} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Limitations}
+
+Simulations used TMY3 data; real deployments face sensor noise and model mismatch. The top-$k$ projection is heuristic. The physics reward requires approximate $C_i$, $K_i$ values. The extended range requires occupant field validation. The framework addresses On/Off units; inverter-driven variable-speed compressors would require continuous action spaces.
+
+%%=========================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+%%=========================================================================
+
+This paper presented PI-PPO, a physics-informed deep reinforcement learning framework for cost-optimal coordination of On/Off split AC units in Saudi residential buildings under the kingdom's two-tier tariff. Three features distinguish PI-PPO from prior work. First, it learns a \textit{stationary} policy that operates over an infinite time horizon. Second, the physics-informed reward ensures near-zero comfort violations ($\leq$0.02$^\circ$C) at all times. Third, the model incorporates inter-zone thermal coupling, enabling the agent to exploit buffering through shared walls.
+
+Evaluated across four representative months, PI-PPO reduced peak demand by 40--60\% and July cost by 22.6\% for a 5-zone villa. Extending the comfort band by $\pm$1$^\circ$C yielded 31.9\% savings for the villa and 49.2\% for a 20-zone compound. The framework scaled to 100~zones with inference below 0.04~s.
+
+Future work includes: (i)~sim-to-real deployment with online parameter estimation; (ii)~incorporating time-of-use pricing under Vision~2030; (iii)~integrating rooftop PV and battery storage; (iv)~occupant field studies for the 22--26$^\circ$C range; and (v)~extension to inverter-driven variable-speed units.
+
+\section*{Acknowledgments}
+The author would like to acknowledge the Deanship of Graduate Studies and Scientific Research, Taif University, for funding this work.
+
+\section*{Author Contributions}
+The author designed the study, conducted experiments, and wrote the manuscript.
+
+\section*{Data Availability}
+Codes and datasets are available at: \url{https://github.com/drhamzahfaraj/pi-ppo-green-scheduling}.
+
+\section*{Conflicts of Interest}
+The author declares no conflicts of interest.
+
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+
+\end{document}
