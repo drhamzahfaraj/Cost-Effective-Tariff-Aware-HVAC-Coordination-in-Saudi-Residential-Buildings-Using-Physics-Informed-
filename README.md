@@ -8,8 +8,6 @@
 
 **Title:** Cost-Optimal Coordination for Peak Demand Reduction in Saudi Residential Buildings Using Physics-Informed Deep Reinforcement Learning  
 **Author:** Hamzah Faraj — Department of Science and Technology, Ranyah College, Taif University, Taif 21944, Saudi Arabia  
-**Submitted to:** *Applied Energy*  
-**Status:** Under Review
 
 ---
 
