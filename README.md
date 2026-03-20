@@ -4,7 +4,7 @@
 
 ---
 
-## 📄 Paper
+## Paper
 
 **Title:** Cost-Optimal Coordination for Peak Demand Reduction in Saudi Residential Buildings Using Physics-Informed Deep Reinforcement Learning  
 **Author:** Hamzah Faraj — Department of Science and Technology, Ranyah College, Taif University, Taif 21944, Saudi Arabia  
@@ -13,7 +13,7 @@
 
 ---
 
-## 📋 Abstract
+## Abstract
 
 When multiple On/Off split air-conditioning units in Saudi residential buildings activate simultaneously, the resulting peak demand spike stresses the electrical grid and inflates monthly bills under the kingdom's two-tier tariff (0.18 SAR/kWh ≤ 6,000 kWh; 0.30 SAR/kWh above). This paper proposes a **Physics-Informed Proximal Policy Optimization (PI-PPO)** framework that learns a *stationary* scheduling policy — applicable over an infinite time horizon without re-solving any optimization — to coordinate 18,500 BTU On/Off split units (1.8 kW input, EER 10.25) across multiple zones.
 
@@ -27,7 +27,7 @@ Key results:
 
 ---
 
-## 🗂️ Repository Structure
+## Repository Structure
 
 ```
 pi-ppo-green-scheduling/
@@ -61,7 +61,7 @@ pi-ppo-green-scheduling/
 
 ---
 
-## ⚙️ Method Overview
+## Method Overview
 
 PI-PPO replaces the classical reactive lazy scheduler with a learned stationary policy. The framework has four key features:
 
@@ -94,7 +94,7 @@ PI-PPO replaces the classical reactive lazy scheduler with a learned stationary 
 
 ---
 
-## 🏗️ Building Setup
+## Building Setup
 
 **5-Zone Villa (Saudi Arabia)** — All units: 18,500 BTU, 1.8 kW input, 5.3 kW cooling, EER 10.25
 
@@ -108,7 +108,7 @@ PI-PPO replaces the classical reactive lazy scheduler with a learned stationary 
 
 ---
 
-## 📊 Key Results
+## Key Results
 
 ### Year-Round Performance — 5-Zone Villa, Strict [23–25°C]
 
@@ -166,7 +166,7 @@ PI-PPO replaces the classical reactive lazy scheduler with a learned stationary 
 
 ---
 
-## 🚀 Quickstart
+## Quickstart
 
 ### Requirements
 
@@ -221,12 +221,12 @@ If you use this work, please cite:
 
 ---
 
-## 🏛️ Acknowledgments
+## Acknowledgments
 
 The author acknowledges the Deanship of Graduate Studies and Scientific Research, Taif University, for funding this work.
 
 ---
 
-## 📜 License
+## License
 
 This repository is for academic reproducibility. Code is released under the MIT License. The manuscript is copyright of the author.
