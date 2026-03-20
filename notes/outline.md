@@ -60,7 +60,7 @@
 - [x] Eq.(6): Temperature fall solution (ON phase)
 - [x] Eq.(7): Minimum utilization d_i
 - [x] Eq.(8): Coupled system dynamics
-- [x] Eq.(9): Physics-informed reward r(t)
+Eq.(9): Physics-informed reward r(t)
 
 ---
 
