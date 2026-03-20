@@ -202,23 +202,6 @@ python nn_surrogate.py --samples 50000 --save surrogate.pt
 
 ---
 
-## 📚 Citation
-
-If you use this work, please cite:
-
-```bibtex
-@article{faraj2026pippo,
-  author  = {Hamzah Faraj},
-  title   = {Cost-Optimal Coordination for Peak Demand Reduction in {Saudi} Residential Buildings
-             Using Physics-Informed Deep Reinforcement Learning},
-  journal = {Applied Energy},
-  year    = {2026},
-  note    = {Under Review}
-}
-```
-
----
-
 ## Acknowledgments
 
 The author acknowledges the Deanship of Graduate Studies and Scientific Research, Taif University, for funding this work.
