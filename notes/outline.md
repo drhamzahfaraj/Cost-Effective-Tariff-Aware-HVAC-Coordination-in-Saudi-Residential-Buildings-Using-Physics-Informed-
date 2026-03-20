@@ -52,34 +52,34 @@
 
 ## Equations Checklist
 
-- [x] Eq.(1): Heat balance with inter-zone coupling
-- [x] Eq.(2): Single-zone simplified dynamics
-- [x] Eq.(3): Saudi two-tier tariff bill formula
-- [x] Eq.(4): Task dynamics (ON/OFF ODE)
-- [x] Eq.(5): Temperature rise solution (OFF phase)
-- [x] Eq.(6): Temperature fall solution (ON phase)
-- [x] Eq.(7): Minimum utilization d_i
-- [x] Eq.(8): Coupled system dynamics
+- Eq.(1): Heat balance with inter-zone coupling
+- Eq.(2): Single-zone simplified dynamics
+- Eq.(3): Saudi two-tier tariff bill formula
+- Eq.(4): Task dynamics (ON/OFF ODE)
+- Eq.(5): Temperature rise solution (OFF phase)
+- Eq.(6): Temperature fall solution (ON phase)
+- Eq.(7): Minimum utilization d_i
+- Eq.(8): Coupled system dynamics
 - Eq.(9): Physics-informed reward r(t)
 
 ---
 
 ## Figures Checklist
 
-- [x] Fig. 1: Jeddah 24-h ambient temperature profiles (4 months, TikZ)
-- [x] Fig. 2: Cooling task dynamics — strict vs extended comfort ranges (TikZ)
-- [x] Fig. 3: PI-PPO architecture diagram (TikZ)
+- Fig. 1: Jeddah 24-h ambient temperature profiles (4 months, TikZ)
+- Fig. 2: Cooling task dynamics — strict vs extended comfort ranges (TikZ)
+- Fig. 3: PI-PPO architecture diagram (TikZ)
 
 ---
 
 ## Tables Checklist
 
-- [x] Table 1: 5-zone villa specifications
-- [x] Table 2: Year-round results, 5-zone villa
-- [x] Table 3: Year-round results, 20-zone compound
-- [x] Table 4: Full baseline comparison, 5-zone July
-- [x] Table 5: Comfort extension comparison
-- [x] Table 6: Ablation study
-- [x] Table 7: Literature comparison
-- [x] Table 8: Scalability
-- [x] Table 9: Waterfall decomposition
+- Table 1: 5-zone villa specifications
+- Table 2: Year-round results, 5-zone villa
+- Table 3: Year-round results, 20-zone compound
+- Table 4: Full baseline comparison, 5-zone July
+- Table 5: Comfort extension comparison
+- Table 6: Ablation study
+- Table 7: Literature comparison
+- Table 8: Scalability
+- Table 9: Waterfall decomposition
