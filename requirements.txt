@@ -1,11 +1,12 @@
 # PI-PPO: Python dependencies
-# Tested with Python 3.10, PyTorch 2.1, EnergyPlus 23.2
+# Tested with:
 
-numpy>=1.26.0
 torch>=2.1.0
-stable-baselines3>=2.2.1
-gymnasium>=0.29.1
-pyyaml>=6.0.1
-pandas>=2.1.0
-matplotlib>=3.8.0
+numpy>=1.24.0
+sinergym>=3.3.0
+gymnasium>=0.29.0
+pyyaml>=6.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+tensorboard>=2.14.0
 scipy>=1.11.0
