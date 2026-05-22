@@ -1,0 +1,13 @@
+n_zones: 20
+comfort_low: [23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23]
+comfort_high: [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25]
+
+generation:
+  method: replicated_villa_with_perturbation
+  base: villa_5zone.yaml
+  perturbation_pct: 15
+  K_ij_range: [0.03, 0.06]
+  topology: chain
+  seed: 42
+
+ac_unit: {btu: 18500, P_elec: 1.8, Q_cool: -5.3, eer: 10.25, type: OnOff}
