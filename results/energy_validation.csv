@@ -1,0 +1,6 @@
+Month,Model_kWh,EnergyPlus_kWh,Error_kWh,Error_pct
+January,520,513,7,1.4
+April,2270,2223,47,2.1
+July,3950,3854,96,2.5
+October,2720,2672,48,1.8
+Annual_4months,9460,9262,198,2.1

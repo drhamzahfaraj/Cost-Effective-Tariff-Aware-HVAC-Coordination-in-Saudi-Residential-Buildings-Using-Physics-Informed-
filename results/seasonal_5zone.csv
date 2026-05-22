@@ -1,0 +1,13 @@
+Month,Method,Bill_SAR,Reduction_pct,E_tot_kWh,P_peak_kW,Violation_C
+Jan,On-Off,94,,520,9.0,0.00
+Jan,GS,86,8.5,480,5.4,0.00
+Jan,PI-PPO,83,11.7,460,3.6,0.00
+Apr,On-Off,409,,2270,9.0,0.00
+Apr,GS,355,13.2,1970,5.4,0.00
+Apr,PI-PPO,328,19.8,1820,5.4,0.00
+Jul,On-Off,711,,3950,9.0,0.00
+Jul,GS,621,12.7,3450,5.4,0.00
+Jul,PI-PPO,551,22.5,3060,5.4,0.00
+Oct,On-Off,490,,2720,9.0,0.00
+Oct,GS,425,13.3,2360,5.4,0.00
+Oct,PI-PPO,392,20.0,2180,5.4,0.00
