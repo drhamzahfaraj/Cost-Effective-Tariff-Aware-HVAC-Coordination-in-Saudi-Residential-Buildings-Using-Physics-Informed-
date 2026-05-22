@@ -146,13 +146,4 @@ The author acknowledges the Deanship of Graduate Studies and Scientific Research
 
 ## Citation
 
-```bibtex
-@article{Faraj2026RBRL,
-  author  = {Faraj, Hamzah},
-  title   = {Hybrid Rule-Constrained {PPO} for Cost-Optimal Binary {HVAC}
-             Scheduling in Saudi Residential Buildings},
-  journal = {Journal of King Saud University -- Engineering Sciences},
-  year    = {2026},
-  note    = {Under review}
-}
 ```
