@@ -10,8 +10,8 @@ Department of Science and Technology
 Ranyah College, Taif University  
 Taif 21944, Saudi Arabia  
 ----------------------------------------------------  
-f.hamzah@tu.edu.sa  
-ORCID ID:https://orcid.org/0009-0009-8832-0407
+Email: f.hamzah@tu.edu.sa  
+ORCID ID: https://orcid.org/0009-0009-8832-0407
 ---
 
 ## Repository Structure
