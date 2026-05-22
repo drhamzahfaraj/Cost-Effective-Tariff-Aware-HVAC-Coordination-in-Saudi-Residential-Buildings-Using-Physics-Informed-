@@ -1,15 +1,14 @@
 # PI-PPO: Physics-Informed Deep Reinforcement Learning for Peak Demand Reduction in Saudi Residential Buildings
 
-[![ORCID ID](https://orcid.org/0009-0009-8832-0407-blue)](ORCID)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9+-brightgreen)](requirements.txt)
 
 ## Author
 
 **Hamzah Faraj**
-Department of Science and Technology, Ranyah College, Taif University, Taif 21944, Saudi Arabia
-📧 f.hamzah@tu.edu.sa
-ORCID ID:\href{https://orcid.org/0009-0009-8832-0407}
+Department of Science and Technology, Ranyah College, Taif University, Taif 21944, Saudi Arabia  
+f.hamzah@tu.edu.sa
+ORCID ID:https://orcid.org/0009-0009-8832-0407
 ---
 
 ## Repository Structure
