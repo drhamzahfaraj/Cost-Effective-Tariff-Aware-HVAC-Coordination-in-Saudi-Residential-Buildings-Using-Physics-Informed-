@@ -1,6 +1,6 @@
 # PI-PPO: Physics-Informed Deep Reinforcement Learning for Peak Demand Reduction in Saudi Residential Buildings
 
-[![ORCID](https://orcid.org/0009-0009-8832-0407-blue)](ORCID/)
+[![ORCID](https://orcid.org/0009-0009-8832-0407-blue)](ORCID)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9+-brightgreen)](requirements.txt)
 
