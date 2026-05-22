@@ -9,9 +9,9 @@
 **Hamzah Faraj**
 Department of Science and Technology, Ranyah College  
 Taif University  
-Taif 21944, Saudi Arabia
-Email: f.hamzah@tu.edu.sa
-ORCID: https://orcid.org/0009-0009-8832-0407
+  Taif 21944, Saudi Arabia
+  Email: f.hamzah@tu.edu.sa
+  ORCID: https://orcid.org/0009-0009-8832-0407
 ---
 
 ## Repository Structure
