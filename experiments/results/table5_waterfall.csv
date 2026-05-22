@@ -1,8 +1,0 @@
-configuration,bill_SAR,p_peak_kW,cumulative_reduction_pp,improvement_pp
-On-Off (strict baseline),4020,36.0,0,0
-+ Scheduling coordination (GS),3180,21.6,20.9,20.9
-+ PPO policy learning,3018,21.6,24.9,4.0
-+ Tiered-tariff awareness,2850,21.6,29.1,4.2
-+ Physics-informed reward,2772,19.8,31.0,1.9
-+ Inter-zone coupling,2676,18.0,33.4,2.4
-+ Comfort extension [22-26C],2042,12.6,49.2,15.8

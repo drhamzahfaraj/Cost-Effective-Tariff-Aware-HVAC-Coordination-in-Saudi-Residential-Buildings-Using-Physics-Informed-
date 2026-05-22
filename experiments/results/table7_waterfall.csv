@@ -1,9 +1,0 @@
-# Table 8 (paper): Waterfall decomposition, 20-zone compound, July
-source,bill_SAR,P_peak_kW,cumulative_pp
-On-Off (strict),4020,36.0,0
-+ Scheduling coordination (GS),3176,21.6,21.0
-+ PPO policy learning,3015,21.6,25.0
-+ Tiered-tariff awareness,2854,21.6,29.0
-+ Physics-informed reward,2774,19.8,31.0
-+ Inter-zone coupling,2693,18.0,33.0
-+ Comfort extension [22-26C],2131,12.6,47.0

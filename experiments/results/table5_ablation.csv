@@ -1,9 +1,0 @@
-# Table 6 (paper): Component ablation, 20-zone compound, strict [23-25C], July
-variant,bill_SAR,reduction_pct,P_peak_kW,violation_degC
-PI-PPO (full coupled),2693,33.0,18.0,0.02
-w/o r_physics,2935,27.0,21.6,0.10
-w/o r_peak,2854,29.0,25.2,0.02
-w/o r_feas,2794,30.5,19.8,0.05
-w/o coupling,2774,31.0,19.8,0.02
-w/o tariff awareness,2874,28.5,18.0,0.02
-w/o physics and feas,3276,18.5,25.2,0.18
