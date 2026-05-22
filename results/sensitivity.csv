@@ -1,0 +1,6 @@
+Parameter,Perturbation,Cost_Reduction_pct,Delta_pp
+Nominal,0%,22.5,0.0
+K_i,+20%,20.1,-2.4
+K_i,-20%,24.8,+2.3
+C_i,+20%,21.2,-1.3
+C_i,-20%,23.7,+1.2
