@@ -1,0 +1,49 @@
+# PI-PPO Hyperparameters
+
+ppo:
+  learning_rate: 0.0003
+  gamma: 0.99
+  epsilon: 0.2
+  ppo_epochs: 10
+  gae_lambda: 0.95
+  grad_clip: 0.5
+  entropy_coeff: 0.01
+
+network:
+  policy: [256, 256]
+  activation: relu
+
+surrogate:
+  layers: [128, 256, 128]
+  activation: relu
+  batch_norm: true
+  training_samples: 50000
+
+reward_weights:
+  omega_0_peak: 0.5
+  omega_1_tariff: 1.0
+  omega_2_comfort: 10.0
+  omega_3_physics: 0.5
+  omega_4_feas: 2.0
+  omega_5_switch: 0.1
+
+tariff:
+  tier1_rate: 0.18
+  tier2_rate: 0.30
+  threshold_kwh: 6000
+
+training:
+  episodes_5z: 5000
+  episodes_20z: 10000
+  episodes_50z: 15000
+  episodes_100z: 15000
+  seeds: [0, 1, 2, 3, 4]
+  dt_minutes: 15
+  months: [january, april, july, october]
+  days_per_month: 30
+
+hardware:
+  gpu: NVIDIA A100
+  framework: PyTorch 2.1
+  simulator: EnergyPlus 23.2 via Sinergym 3.3
+  weather: Jeddah TMY3 IWEC 41024

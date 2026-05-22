@@ -1,0 +1,12 @@
+n_zones: 5
+comfort_low: [23, 23, 23, 23, 23]
+comfort_high: [25, 25, 25, 25, 25]
+
+zones:
+  - {name: Majlis, area: 30, K_i: 0.28, C_i: 3600, K_ij: [0.05], neighbors: [1]}
+  - {name: Living, area: 25, K_i: 0.25, C_i: 3000, K_ij: [0.05, 0.04], neighbors: [0, 2]}
+  - {name: Master, area: 25, K_i: 0.24, C_i: 3000, K_ij: [0.04, 0.04], neighbors: [1, 3]}
+  - {name: Bedroom2, area: 20, K_i: 0.22, C_i: 2400, K_ij: [0.04, 0.04], neighbors: [2, 4]}
+  - {name: Bedroom3, area: 20, K_i: 0.22, C_i: 2400, K_ij: [0.04], neighbors: [3]}
+
+ac_unit: {btu: 18500, P_elec: 1.8, Q_cool: -5.3, eer: 10.25, type: OnOff}
