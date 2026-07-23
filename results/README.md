@@ -20,3 +20,9 @@ Billing computed via Saudi two-tier tariff:
 - model_validation.csv: Table 10 (zone-level, July)
 - model_validation_seasonal.csv: Table 11 (4-month RMSE)
 - energy_validation.csv: Table 12 (monthly kWh: model vs EnergyPlus)
+
+## Scalability protocol (Table 8)
+The 50- and 100-zone values are means across nine configurations per scale:
+three adjacency topologies (chain, grid, star) x three parameter seeds (42, 123, 2024).
+Cost-reduction variation across configurations: +/-1.2 pp at 50 zones, +/-1.5 pp at 100 zones.
+All results tables report means across 5 training seeds (0-4); no best-seed selection.
