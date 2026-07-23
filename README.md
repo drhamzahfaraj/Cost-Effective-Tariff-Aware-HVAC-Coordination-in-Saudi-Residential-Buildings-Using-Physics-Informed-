@@ -8,7 +8,7 @@
 
 **Hamzah Faraj**
 Department of Science and Technology, Ranyah College, Taif University, Taif 21944, Saudi Arabia
-📧 f.hamzah@tu.edu.sa
+Email: f.hamzah@tu.edu.sa
 
 ---
 
