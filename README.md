@@ -110,13 +110,13 @@ When multiple On/Off split air-conditioning units in Saudi residential buildings
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    PI-PPO Architecture                    │
-│                                                          │
+│                    PI-PPO Architecture                  │
+│                                                         │
 │   NN Surrogate ──→ PPO Agent ──→ Building Environment   │
-│   (k, Q_i)          (m(t))       (x(t), E_cum)         │
-│                       ↑                  │               │
-│                       └── PI Reward + ───┘               │
-│                           Tariff Signal                  │
+│   (k, Q_i)          (m(t))       (x(t), E_cum)          │
+│                       ↑                  │              │
+│                       └── PI Reward + ───┘              │
+│                           Tariff Signal                 │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -233,15 +233,3 @@ The author would like to acknowledge the Deanship of Graduate Studies and Scient
 
 ---
 
-## Citation
-
-```bibtex
-@article{faraj2026pippo,
-  author  = {Faraj, Hamzah},
-  title   = {Cost-Effective Coordination for Peak Demand Reduction in Saudi Residential
-             Buildings Using Physics-Informed Deep Reinforcement Learning},
-  journal = {Journal of King Saud University -- Engineering Sciences},
-  year    = {2026},
-  note    = {Under review}
-}
-```
