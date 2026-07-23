@@ -1,3 +1,5 @@
+# NOTE: All reported metrics are MEANS across the 5 training seeds (0-4).
+# No evaluation-based seed selection is applied (see paper Sec. 7).
 """
 Evaluation and Billing Computation
 Computes monthly bills using Saudi two-tier tariff formula.
