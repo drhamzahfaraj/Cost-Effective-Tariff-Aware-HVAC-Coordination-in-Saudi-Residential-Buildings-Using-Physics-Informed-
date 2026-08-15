@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software or data, please cite the accompanying paper."
+title: "PI-PPO: Tariff-Aware HVAC Coordination for Saudi Residential Buildings"
+authors:
+  - family-names: Faraj
+    given-names: Hamzah
+    affiliation: "Department of Science and Technology, Ranyah College, Taif University"
+version: "1.0.0"
+date-released: "2026-08-15"

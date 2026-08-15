@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+results_generated.json
+results_generated.md
+*.aux
+*.log
+*.out

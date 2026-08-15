@@ -1,235 +1,146 @@
-# PI-PPO: Physics-Informed Deep Reinforcement Learning for Peak Demand Reduction in Saudi Residential Buildings
+# PI-PPO: Tariff-Aware HVAC Coordination for Saudi Residential Buildings
 
-[![Paper](https://img.shields.io/badge/Paper-Applied%20Energy-blue)](paper/)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.9+-brightgreen)](requirements.txt)
+Reproducible code and data for the paper:
 
-## Author
+> **Tariff-Aware HVAC Coordination in Saudi Residential Buildings Using Physics-Informed Deep Reinforcement Learning**
+> Hamzah Faraj, Department of Science and Technology, Ranyah College, Taif University.
 
-**Hamzah Faraj**
-Department of Science and Technology, Ranyah College, Taif University, Taif 21944, Saudi Arabia
-Email: f.hamzah@tu.edu.sa
+This repository contains everything needed to independently regenerate **every quantitative
+result and figure** in the paper. Nothing is hardcoded: all reported numbers are measured by
+executing the simulation and the reinforcement-learning training in `src/`.
 
 ---
 
-## Repository Structure
+## 1. What this is (and is not)
+
+- It **is** a lumped-parameter (RC) thermal simulation of multi-zone residential cooling under
+  the Saudi two-tier electricity tariff, plus a Physics-Informed Proximal Policy Optimization
+  (PI-PPO) scheduler and baselines (On/Off thermostat, greedy/lazy scheduling).
+- It **is not** EnergyPlus or a detailed building-physics model. The RC model is a reduced-order
+  abstraction chosen for analytical tractability. The paper states this plainly and lists
+  higher-fidelity validation as future work.
+
+The headline results are deliberately modest and are reported honestly (see §5).
+
+---
+
+## 2. Quick start
+
+```bash
+# 1. install (Python >= 3.10)
+pip install numpy pyyaml torch
+
+# 2. quick smoke test (2 seeds x 150 episodes, ~10 min CPU)
+python src/simulator.py
+
+# 3. fast run (2 seeds x 400 episodes, ~15-25 min CPU)
+python src/simulator.py --fast
+
+# 4. full run used for the paper (3 seeds x 1000 episodes)
+python src/simulator.py --full
+```
+
+Outputs are written next to the script:
+- `results_generated.json` — machine-readable results (means, standard deviations, comfort magnitudes)
+- `results_generated.md` — a human-readable table
+
+The committed `results/converged_results.json` is the reference output of the `--full` run that
+the paper's tables are built from.
+
+Optional flags:
+- `--city jeddah|riyadh` — weather profile (paper uses Jeddah)
+- `--comfort <float>` — override the comfort-penalty weight (default 45)
+
+---
+
+## 3. Repository layout
 
 ```
-pi-ppo-green-scheduling/
-├── README.md                    # This file
-├── LICENSE                      # MIT License
-├── requirements.txt             # Python dependencies
-├── paper/
-│   ├── main.tex                 # Manuscript source (LaTeX)
-│   ├── references.bib           # Bibliography (36 references, all DOI-verified)
+.
+├── README.md                     # this file
 ├── src/
-│   ├── train_pippo.py           # Main training script
-│   ├── environment.py           # Sinergym environment wrapper with coupling
-│   ├── reward.py                # 6-component physics-informed reward
-│   ├── surrogate.py             # NN surrogate for feasibility estimation
-│   ├── scheduler.py             # Lazy scheduling controller (GS baseline)
-│   ├── agent.py                 # PPO agent with top-k projection
-│   ├── evaluate.py              # Evaluation and billing computation
-│   └── utils.py                 # Thermal parameter utilities
+│   └── simulator.py              # self-contained: RC model, tariff, baselines,
+│                                 #   DP expert, behaviour cloning, PPO, evaluation
 ├── configs/
-│   ├── hyperparameters.yaml     # Training hyperparameters
-│   ├── villa_5zone.yaml         # 5-zone villa configuration
-│   ├── compound_20zone.yaml     # 20-zone compound configuration
-│   └── jeddah_weather.epw       # → Placeholder: download from EnergyPlus weather DB
+│   ├── villa_5zone.yaml          # 5-zone villa (per-zone On/Off split units)
+│   └── building_20zone_multifloor.yaml   # 20-zone multi-floor building
+├── data/
+│   ├── jeddah_ambient_profiles.csv       # Jeddah diurnal profiles (paper scope)
+│   ├── riyadh_ambient_profiles.csv       # optional: hotter, larger diurnal swing
+│   └── taif_ambient_profiles.csv         # optional: cooler; not used in the paper
 ├── results/
-│   ├── seasonal_5zone.csv       # Table 2: 5-zone seasonal results
-│   ├── seasonal_20zone.csv      # Table 3: 20-zone seasonal results
-│   ├── july_full_comparison.csv  # Table 4: Full baseline comparison (July)
-│   ├── comfort_extension.csv    # Table 5: Comfort range extension results
-│   ├── ablation.csv             # Table 6: Component ablation study
-│   ├── scalability.csv          # Table 8: Scalability results
-│   ├── waterfall.csv            # Table 9: Waterfall decomposition
-│   └── sensitivity.csv          # Sensitivity analysis on K_i, C_i
-└── data/
-    ├── README.md                            # Dataset documentation & provenance
-    ├── jeddah_ambient_profiles.csv          # Fig. 1 ambient profiles (15-min, 4 months)
-    ├── energyplus_trace_july_5zone_onoff.csv # 30-day July 5-zone trace (2,880 rows)
-    └── surrogate_training_sample.csv        # 500-row LHS sample of the 50,000-point set
+│   └── converged_results.json    # reference output the paper's tables use
+├── paper/
+│   ├── main_honest.tex           # manuscript source (LaTeX)
+│   ├── main_honest.pdf           # compiled manuscript
+│   └── references.bib            # bibliography
+└── docs/
+    ├── METHODS.md                # detailed method description
+    ├── RESULTS.md                # the numbers, with interpretation
+    ├── REPRODUCIBILITY.md        # how each table/figure maps to a command
+    └── CHANGELOG.md              # honest record of the correction history
 ```
 
 ---
 
-## Abstract
+## 4. How the method works (short version)
 
-When multiple On/Off split air-conditioning units in Saudi residential buildings activate simultaneously, the resulting peak demand spike stresses the electrical grid and inflates monthly bills under the kingdom's two-tier tariff (0.18 SAR/kWh ≤ 6,000 kWh; 0.30 SAR/kWh above). This paper proposes a Physics-Informed Proximal Policy Optimization (PI-PPO) framework that learns a *stationary* scheduling policy — applicable over an infinite time horizon — to coordinate 18,500 BTU On/Off split units (1.8 kW input, EER 10.25) across multiple zones. PI-PPO embeds heat balance equations directly into the RL reward, yielding near-zero comfort violations. Simulations using EnergyPlus with Jeddah weather data across four representative months show that PI-PPO reduces peak demand by 40–60% in cooling-dominant months (April–October), reaching 80% in mild January, and reduces July cost by 22.5% for a 5-zone villa, rising to 47.0% for a 20-zone compound with ±1°C comfort extension.
+Each thermal zone is served by its **own** On/Off split air-conditioning unit, as is standard in
+Saudi housing. The controller must decide, at each 15-minute step, which units run — respecting a
+comfort band and a concurrency limit — to minimise the monthly bill under the two-tier tariff.
 
----
+PI-PPO combines:
+1. A **physics-informed reward** that embeds the zone heat-balance so the agent gets a dense,
+   physically meaningful learning signal.
+2. A **behaviour-cloning warm-start** from a per-zone dynamic-programming expert (PPO from scratch
+   converges poorly in this binary, high-dimensional action space).
+3. A **feasibility / concurrency analysis** that bounds how many units may run at once.
 
-## Key Results and Findings
+Baselines: an On/Off hysteresis thermostat (competent, not naive) and a greedy/lazy scheduler.
 
-### Headline Results
-| Configuration | Comfort Range | July Cost Reduction | Peak Demand Reduction |
-|--------------|---------------|--------------------|-----------------------|
-| 5-zone villa | Strict [23–25°C] | 22.5% | 40% |
-| 5-zone villa | Extended [22–26°C] | 31.9% | 60% |
-| 20-zone compound | Strict [23–25°C] | 33.0% | 50% |
-| 20-zone compound | Extended [22–26°C] | 47.0% | 65% |
-
-### Ablation Study (20-zone, strict, July)
-| Variant | Bill (SAR) | Reduction (%) | P_peak (kW) | Violation (°C) |
-|---------|-----------|--------------|-------------|----------------|
-| **PI-PPO (full, coupled)** | **2,694** | **33.0** | **18.0** | **0.02** |
-| w/o r_physics | 2,935 | 27.0 | 21.6 | 0.10 |
-| w/o r_peak | 2,854 | 29.0 | 25.2 | 0.02 |
-| w/o r_feas | 2,794 | 30.5 | 19.8 | 0.05 |
-| w/o coupling | 2,774 | 31.0 | 19.8 | 0.02 |
-| w/o tariff awareness | 2,874 | 28.5 | 18.0 | 0.02 |
-| w/o physics & feas | 3,276 | 18.5 | 25.2 | 0.18 |
-
-### Benchmarking Against Published DRL Methods
-| Reference | Method | Metric | Savings |
-|-----------|--------|--------|---------|
-| Lu et al. (2024) | PPO+PID | Energy | 5.3% |
-| Brandi et al. (2024) | TD3 | Energy | 17.0% |
-| Guo et al. (2025) | DRL (SAC) | Energy | 21.4% |
-| Chen et al. (2023) | PINN-RC | Peak† | 78% |
-| Xiao et al. (2024) | ModNN | Peak† | 90% |
-| **This work** | **PI-PPO** | **Peak** | **40–60% (Apr–Oct); 80% (Jan)** |
-| **This work** | **PI-PPO** | **Cost (tiered)** | **22.5–47.0%** |
-
-†Measured under demand-charge tariffs ($/kW penalty), not tiered ($/kWh).
+Full detail: `docs/METHODS.md`.
 
 ---
 
-## Contributions
+## 5. Headline results (honest summary)
 
-1. **Task model with feasibility analysis:** Each zone and its On/Off unit abstracted as a scheduling task with formally analyzed minimum utilization (d_i) and feasibility conditions, adapted for cooling mode
-2. **PI-PPO framework:** Physics-informed reward embedding heat balance equations, schedulability conditions, and tiered-tariff awareness into PPO
-3. **Inter-zone thermal coupling:** Exploits thermal buffering through shared walls for 2.0 pp additional savings
-4. **Comfort extension analysis:** Formal proof that ±1°C comfort relaxation reduces d_i by 36.9%
-5. **Year-round evaluation:** Four representative months (Jan/Apr/Jul/Oct) with realistic Saudi AC specifications
+| Scenario | Band | Cost reduction vs On/Off |
+|---|---|---|
+| 5-zone villa, July | strict [23–25 °C] | ~4.3% |
+| 5-zone villa, July | extended [22–26 °C] | ~13.4% |
+| 20-zone building, July | strict | ~1.0% (near physical optimum) |
+| 20-zone building, July | extended | ~7.8% (high seed variance) |
+| 5-zone villa, seasonal (strict) | Jan/Apr/Oct | 9.1% / 7.9% / 6.9% |
 
----
+**Honest caveats, stated up front:**
+- **Peak demand is not reduced under a strict band.** Both On/Off and PI-PPO peak identically,
+  because the comfort constraint forces compressors on at peak. Savings come from energy and
+  tariff-tier effects, not peak shaving.
+- The **strict-band building saving (~1%) is near the dynamic-programming physical optimum** — in
+  a thermally saturated building there is little scheduling slack, so coordination helps little.
+- The **20-zone extended case has high seed variance** (±172 SAR) and is reported as approximate.
+- PI-PPO trades a small comfort margin for savings (mean violation ~0.16 °C vs the On/Off
+  baseline's ~0.03 °C); most excursions are fractional-degree, with occasional transient peaks of
+  1–3 °C under load.
 
-## Methodology: Mechanism of Energy Savings
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    PI-PPO Architecture                  │
-│                                                         │
-│   NN Surrogate ──→ PPO Agent ──→ Building Environment   │
-│   (k, Q_i)          (m(t))       (x(t), E_cum)          │
-│                       ↑                  │              │
-│                       └── PI Reward + ───┘              │
-│                           Tariff Signal                 │
-└─────────────────────────────────────────────────────────┘
-```
-
-**How PI-PPO reduces costs:**
-
-1. **Scheduling coordination (20.9 pp):** Limits simultaneous compressors to k units, preventing coincident demand spikes
-2. **Anticipatory pre-cooling (4.1 pp):** PPO learns to pre-cool zones during cooler morning hours, building thermal reserves before the afternoon peak
-3. **Tariff-tier management (4.0 pp):** Tracks cumulative kWh relative to the 6,000 kWh threshold, reducing Tier-2 exposure
-4. **Physics-informed guidance (2.0 pp):** Heat balance residual provides dense per-step feedback for physically plausible decisions
-5. **Inter-zone buffering (2.0 pp):** Sequences cooling so a cooled zone's shared wall slows its neighbor's temperature rise
-6. **Comfort extension (14.0 pp):** Wider [22–26°C] band reduces minimum utilization d_i by 36.9%, permitting fewer simultaneous compressors (design parameter, not algorithmic contribution)
-
-### Feature Selection (State Space)
-
-The state vector s(t) = [x(t), m(t−1), T_a(t), E_cum(t), k, Δx(t), t_hour] was selected based on:
-
-| Feature | Justification |
-|---------|---------------|
-| x(t): Zone temperatures | Direct observation of comfort state; required for safety constraint |
-| m(t−1): Previous modes | Prevents excessive compressor cycling; enables switching penalty |
-| T_a(t): Outdoor temperature | Primary heat gain driver; determines cooling demand intensity |
-| E_cum(t): Cumulative consumption | Enables tariff-tier tracking relative to 6,000 kWh threshold |
-| k: Concurrency limit | From surrogate; constrains action space via top-k projection |
-| Δx(t): Temperature derivatives | Provides rate-of-change information for anticipatory pre-cooling |
-| t_hour: Hour of day | Captures diurnal patterns; enables time-aware scheduling |
-
-Features excluded: humidity (On/Off units have no humidity control), solar irradiance (captured implicitly via T_a), occupancy schedules (assumed 24/7 operation in Saudi residential context during summer).
+See `docs/RESULTS.md` for the full breakdown and interpretation.
 
 ---
 
-## Dataset
+## 6. Reproducing specific paper items
 
-### Included datasets (`data/`)
-- `jeddah_ambient_profiles.csv` — the four diurnal ambient profiles of paper Fig. 1 (15-min resolution)
-- `energyplus_trace_july_5zone_onoff.csv` — full 30-day July trace for the 5-zone villa under On-Off control: per-zone RC-model and EnergyPlus-style temperatures (residuals calibrated to Table 10 RMSEs), compressor modes, aggregate power
-- `surrogate_training_sample.csv` — 500-row sample of the 50,000-point LHS surrogate training set with analytical targets (d_i, Q_i*, k*)
-- See `data/README.md` for provenance notes and how these extracts relate to the aggregated tables in `results/`
-
-### Weather Data
-- **Source:** Jeddah TMY3 (Typical Meteorological Year), IWEC station 41024
-- **Download:** [EnergyPlus Weather Database](https://energyplus.net/weather) → Search "Jeddah" → Download `.epw` file
-- **Months evaluated:** January, April, July, October (30-day billing cycles each)
-
-### Building Simulation
-- **Engine:** EnergyPlus 23.2 via Sinergym
-- **AC Units:** 18,500 BTU, 1.8 kW electrical input, 5.3 kW cooling output, EER 10.25
-- **Tariff:** Saudi two-tier: 0.18 SAR/kWh ≤ 6,000 kWh, 0.30 SAR/kWh above
+Every table and figure maps to a command; see `docs/REPRODUCIBILITY.md`. In brief:
+run `python src/simulator.py --full`, then compare `results_generated.json` to
+`results/converged_results.json`.
 
 ---
 
-## Running Experiments
+## 7. Citation
 
-### Prerequisites
+If you use this code or data, please cite the paper (see `paper/`). A `CITATION.cff` can be added
+on request.
 
-```bash
-pip install -r requirements.txt
-```
+## 8. License
 
-### Training
-
-```bash
-# Train PI-PPO on 5-zone villa (July)
-python src/train_pippo.py --config configs/villa_5zone.yaml --month july --seed 0
-
-# Train on 20-zone compound
-python src/train_pippo.py --config configs/compound_20zone.yaml --month july --seed 0
-
-# Reproduce all results (5 seeds × 4 months × 2 scales)
-for seed in 0 1 2 3 4; do
-  for month in january april july october; do
-    python src/train_pippo.py --config configs/villa_5zone.yaml --month $month --seed $seed
-    python src/train_pippo.py --config configs/compound_20zone.yaml --month $month --seed $seed
-  done
-done
-```
-
-### Evaluation
-
-```bash
-# Evaluate trained model and compute billing
-python src/evaluate.py --model checkpoints/pippo_5z_july_seed0.pt --month july --config configs/villa_5zone.yaml
-
-# Run ablation study
-python src/evaluate.py --ablation --config configs/compound_20zone.yaml --month july
-
-# Run sensitivity analysis
-python src/evaluate.py --sensitivity --config configs/villa_5zone.yaml --month july
-```
-
----
-
-## Limitations
-
-1. First-order lumped thermal model does not capture radiative transfer, humidity, or furniture thermal mass
-2. All results are simulation-based (EnergyPlus + TMY3); no calibration against measured data
-3. Four-month evaluation does not demonstrate month-to-month transitions
-4. Top-k projection is heuristic (0.02°C transient violation possible); not a formal safety certificate
-5. Extended comfort range [22–26°C] requires occupant acceptance validation in Saudi households
-6. Limited to On/Off units; inverter-driven units need continuous action spaces
-7. Coupling coefficients K_ij estimated, not measured in situ
-8. Stronger baselines (MILP, constrained RL) would further validate improvements
-
----
-
-## License
-
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-## Acknowledgments
-
-The author would like to acknowledge the Deanship of Graduate Studies and Scientific Research, Taif University, for funding this work.
-
----
-
+Code released for reproducibility. See repository license (add your preferred license, e.g. MIT
+for code and CC-BY for data/paper, before public release).
