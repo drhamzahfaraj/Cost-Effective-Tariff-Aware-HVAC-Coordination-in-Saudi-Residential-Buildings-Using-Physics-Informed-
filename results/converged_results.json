@@ -1,0 +1,86 @@
+{
+  "run_configuration": {
+    "seeds": [0, 1, 2],
+    "episodes_per_policy": 1000,
+    "warm_start": "behaviour cloning from per-zone dynamic-programming expert",
+    "city": "jeddah",
+    "weather": "representative diurnal profiles, four months",
+    "tariff": "Saudi two-tier: 0.18 SAR/kWh up to 6000 kWh/month; 0.30 SAR/kWh above",
+    "billing_cycle_days": 30,
+    "model": "lumped-parameter RC thermal (NumPy); not EnergyPlus",
+    "note": "All bills computed from measured kWh via the two-tier tariff, so bill is consistent with energy by construction. Values are means across 3 seeds."
+  },
+  "results": [
+    {
+      "scenario": "villa_5zone", "month": "July", "band": "strict [23-25]",
+      "onoff_kwh": 3912, "onoff_bill_sar": 704,
+      "pippo_bill_sar": 674, "pippo_bill_sd_sar": 1.8,
+      "cost_reduction_pct": 4.3, "energy_reduction_pct": 4.3,
+      "onoff_peak_kw": 9.0, "pippo_peak_kw": 9.0,
+      "mean_comfort_violation_C": 0.165, "max_comfort_violation_C": 1.4,
+      "note": "Peak unchanged (both 9.0 kW): strict band forces compressors on at peak."
+    },
+    {
+      "scenario": "villa_5zone", "month": "July", "band": "extended [22-26]",
+      "onoff_kwh": 3951, "onoff_bill_sar": 711,
+      "pippo_bill_sar": 616, "pippo_bill_sd_sar": 6.1,
+      "cost_reduction_pct": 13.4, "energy_reduction_pct": 13.4,
+      "onoff_peak_kw": 9.0, "pippo_peak_kw": 9.0,
+      "mean_comfort_violation_C": 0.154, "max_comfort_violation_C": 1.29,
+      "note": "Wider band creates legitimate scheduling slack; largest villa saving."
+    },
+    {
+      "scenario": "villa_5zone", "month": "January", "band": "strict [23-25]",
+      "onoff_kwh": 594, "onoff_bill_sar": 107,
+      "pippo_bill_sar": 97, "pippo_bill_sd_sar": 0.1,
+      "cost_reduction_pct": 9.1, "energy_reduction_pct": 9.1,
+      "onoff_peak_kw": 9.0, "pippo_peak_kw": 9.0,
+      "mean_comfort_violation_C": 0.726, "max_comfort_violation_C": 2.75,
+      "note": "Mild month: little cooling load, looser comfort control (highest mean violation)."
+    },
+    {
+      "scenario": "villa_5zone", "month": "April", "band": "strict [23-25]",
+      "onoff_kwh": 1863, "onoff_bill_sar": 335,
+      "pippo_bill_sar": 309, "pippo_bill_sd_sar": 0.1,
+      "cost_reduction_pct": 7.9, "energy_reduction_pct": 7.9,
+      "onoff_peak_kw": 9.0, "pippo_peak_kw": 9.0,
+      "mean_comfort_violation_C": 0.044, "max_comfort_violation_C": 0.73,
+      "note": "Shoulder month: moderate load with diurnal slack; clean comfort."
+    },
+    {
+      "scenario": "villa_5zone", "month": "October", "band": "strict [23-25]",
+      "onoff_kwh": 2516, "onoff_bill_sar": 453,
+      "pippo_bill_sar": 421, "pippo_bill_sd_sar": 0.1,
+      "cost_reduction_pct": 6.9, "energy_reduction_pct": 6.9,
+      "onoff_peak_kw": 9.0, "pippo_peak_kw": 9.0,
+      "mean_comfort_violation_C": 0.083, "max_comfort_violation_C": 0.91,
+      "note": "Shoulder month."
+    },
+    {
+      "scenario": "building_20zone_multifloor", "month": "July", "band": "strict [23-25]",
+      "onoff_kwh": 16285, "onoff_bill_sar": 4166,
+      "pippo_bill_sar": 4124, "pippo_bill_sd_sar": 30.5,
+      "cost_reduction_pct": 1.0, "energy_reduction_pct": 0.9,
+      "onoff_peak_kw": 36.0, "pippo_peak_kw": 36.0,
+      "mean_comfort_violation_C": 0.175, "max_comfort_violation_C": 2.67,
+      "note": "Near thermal saturation and near the DP physical optimum (~1%): coordination barely helps under strict band at scale."
+    },
+    {
+      "scenario": "building_20zone_multifloor", "month": "July", "band": "extended [22-26]",
+      "onoff_kwh": 16368, "onoff_bill_sar": 4190,
+      "pippo_bill_sar": 3862, "pippo_bill_sd_sar": 172.1,
+      "cost_reduction_pct": 7.8, "energy_reduction_pct": 6.7,
+      "onoff_peak_kw": 36.0, "pippo_peak_kw": 36.0,
+      "mean_comfort_violation_C": 0.172, "max_comfort_violation_C": 2.07,
+      "note": "HIGH SEED VARIANCE (sd 172 SAR). Reported as approximate; needs more seeds. Bill reduction (7.8%) exceeds energy reduction (6.7%) due to Tier-2 avoidance (tariff-crossing effect)."
+    }
+  ],
+  "key_findings": [
+    "Strict-band coordination yields modest savings (1-4%), near the physical optimum for thermally saturated buildings.",
+    "Comfort-band extension is the primary lever, roughly tripling villa savings to ~13%.",
+    "At building scale, bill reduction can exceed energy reduction because coordination lowers consumption billed at the higher Tier-2 rate.",
+    "Peak demand is NOT reduced under a strict band (both controllers peak identically): the comfort constraint forces compressors on at peak.",
+    "Savings are larger in shoulder/mild months than in peak July, indicating coordination helps most where cooling demand is substantial but non-saturating.",
+    "The 20-zone extended case has high seed variance and is reported as approximate."
+  ]
+}
