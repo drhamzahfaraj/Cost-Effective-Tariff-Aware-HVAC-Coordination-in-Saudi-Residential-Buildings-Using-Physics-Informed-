@@ -1,0 +1,14 @@
+# Environment used to produce the paper's results.
+# The author's run: Python 3.13, on Windows.
+#
+# Pinned versions (the results are not sensitive to minor version differences,
+# but these are recorded for exact reproducibility):
+numpy>=2.2
+torch>=2.6
+pyyaml>=6.0
+# Optional, only for scripts/make_figures.py:
+matplotlib>=3.8
+#
+# Note: results were generated on CPU. A GPU (CUDA build of torch) speeds up
+# the --full run substantially but does not change the reported values beyond
+# expected stochastic variation across seeds.

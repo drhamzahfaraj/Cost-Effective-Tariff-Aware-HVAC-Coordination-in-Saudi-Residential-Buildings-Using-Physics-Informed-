@@ -20,7 +20,7 @@ executing the simulation and the reinforcement-learning training in `src/`.
   abstraction chosen for analytical tractability. The paper states this plainly and lists
   higher-fidelity validation as future work.
 
-The headline results are deliberately modest (see §5).
+The headline results are deliberately modest and are reported honestly (see §5).
 
 ---
 
@@ -59,26 +59,32 @@ Optional flags:
 .
 ├── README.md                     # this file
 ├── src/
-│   └── simulator.py              # self-contained: RC model, tariff, baselines,
-│                                 #   DP expert, behaviour cloning, PPO, evaluation
+│   ├── README.md                 # explains single-file vs modular versions
+│   ├── simulator.py              # self-contained: RC model, tariff, baselines,
+│   │                             #   DP expert, behaviour cloning, PPO, evaluation
+│   ├── rc_sim.py                 # modular: RC environment, tariff, baselines
+│   ├── train_real.py             # modular: PPO training loop
+│   ├── best_case.py              # modular: DP expert + behaviour-cloning warm-start
+│   ├── agent.py, reward.py, scheduler.py, surrogate.py, utils.py
 ├── configs/
 │   ├── villa_5zone.yaml          # 5-zone villa (per-zone On/Off split units)
 │   └── building_20zone_multifloor.yaml   # 20-zone multi-floor building
 ├── data/
+│   ├── README.md                         # documents format, provenance, per-city ranges
 │   ├── jeddah_ambient_profiles.csv       # Jeddah diurnal profiles (paper scope)
 │   ├── riyadh_ambient_profiles.csv       # optional: hotter, larger diurnal swing
 │   └── taif_ambient_profiles.csv         # optional: cooler; not used in the paper
 ├── results/
 │   └── converged_results.json    # reference output the paper's tables use
 ├── paper/
-│   ├── main.tex           # manuscript source (LaTeX)
-│   ├── main.pdf           # compiled manuscript
+│   ├── main_honest.tex           # manuscript source (LaTeX)
+│   ├── main_honest.pdf           # compiled manuscript
 │   └── references.bib            # bibliography
 └── docs/
     ├── METHODS.md                # detailed method description
     ├── RESULTS.md                # the numbers, with interpretation
     ├── REPRODUCIBILITY.md        # how each table/figure maps to a command
-    └── CHANGELOG.md              #  record of the correction history
+    └── CHANGELOG.md              # honest record of the correction history
 ```
 
 ---
@@ -127,7 +133,27 @@ See `docs/RESULTS.md` for the full breakdown and interpretation.
 
 ---
 
-## 6. Reproducing specific paper items
+## 6. Verify, reproduce, and regenerate figures
+
+Quick check the pipeline works (~2 min):
+```
+python tests/verify.py        # or: make verify
+```
+
+Full run producing the paper's numbers:
+```
+python src/simulator.py --full   # or: make reproduce
+```
+
+Regenerate figures from the measured results:
+```
+python scripts/make_figures.py   # or: make figures  -> writes figures/
+```
+
+See `results/sample_output_full.md` for the expected output, and
+`DATA_AVAILABILITY.md` for the data/code availability statement.
+
+## 7. Reproducing specific paper items
 
 Every table and figure maps to a command; see `docs/REPRODUCIBILITY.md`. In brief:
 run `python src/simulator.py --full`, then compare `results_generated.json` to
@@ -135,12 +161,12 @@ run `python src/simulator.py --full`, then compare `results_generated.json` to
 
 ---
 
-## 7. Citation
+## 8. Citation
 
 If you use this code or data, please cite the paper (see `paper/`). A `CITATION.cff` can be added
 on request.
 
-## 8. License
+## 9. License
 
 Code released for reproducibility. See repository license (add your preferred license, e.g. MIT
 for code and CC-BY for data/paper, before public release).
