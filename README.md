@@ -20,7 +20,7 @@ executing the simulation and the reinforcement-learning training in `src/`.
   abstraction chosen for analytical tractability. The paper states this plainly and lists
   higher-fidelity validation as future work.
 
-The headline results are deliberately modest and are reported honestly (see §5).
+The headline results are deliberately modest (see §5).
 
 ---
 
@@ -71,14 +71,14 @@ Optional flags:
 ├── results/
 │   └── converged_results.json    # reference output the paper's tables use
 ├── paper/
-│   ├── main_honest.tex           # manuscript source (LaTeX)
-│   ├── main_honest.pdf           # compiled manuscript
+│   ├── main.tex           # manuscript source (LaTeX)
+│   ├── main.pdf           # compiled manuscript
 │   └── references.bib            # bibliography
 └── docs/
     ├── METHODS.md                # detailed method description
     ├── RESULTS.md                # the numbers, with interpretation
     ├── REPRODUCIBILITY.md        # how each table/figure maps to a command
-    └── CHANGELOG.md              # honest record of the correction history
+    └── CHANGELOG.md              #  record of the correction history
 ```
 
 ---
