@@ -1,7 +1,0 @@
-Zone,RMSE_C,R2,Cycle_Error_pct,E_day_Error_pct,P_peak_Error_pct
-Majlis,0.31,0.94,4.2,3.1,0.0
-Living,0.28,0.95,3.8,2.7,0.0
-Master,0.26,0.96,3.5,2.4,0.0
-Bedroom2,0.22,0.97,3.1,2.0,0.0
-Bedroom3,0.24,0.96,3.3,2.2,0.0
-Mean,0.26,0.96,3.6,2.5,0.0
