@@ -1,0 +1,6 @@
+month,band,onoff_kwh,onoff_bill_sar,pippo_bill_sar,cost_reduction_pct,mean_viol_C,max_viol_C
+July,strict,3912,704,674,4.3,0.165,1.4
+July,extended,3951,711,616,13.4,0.154,1.29
+January,strict,594,107,97,9.1,0.726,2.75
+April,strict,1863,335,309,7.9,0.044,0.73
+October,strict,2516,453,421,6.9,0.083,0.91

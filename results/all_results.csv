@@ -1,0 +1,8 @@
+scenario,month,band,onoff_kwh,onoff_bill_sar,pippo_bill_sar,pippo_bill_sd_sar,cost_reduction_pct,energy_reduction_pct,onoff_peak_kw,pippo_peak_kw,mean_viol_C,max_viol_C
+villa_5zone,July,strict,3912,704,674,1.8,4.3,4.3,9.0,9.0,0.165,1.4
+villa_5zone,July,extended,3951,711,616,6.1,13.4,13.4,9.0,9.0,0.154,1.29
+villa_5zone,January,strict,594,107,97,0.1,9.1,9.1,9.0,9.0,0.726,2.75
+villa_5zone,April,strict,1863,335,309,0.1,7.9,7.9,9.0,9.0,0.044,0.73
+villa_5zone,October,strict,2516,453,421,0.1,6.9,6.9,9.0,9.0,0.083,0.91
+building_20zone_multifloor,July,strict,16285,4166,4124,30.5,1.0,0.9,36.0,36.0,0.175,2.67
+building_20zone_multifloor,July,extended,16368,4190,3862,172.1,7.8,6.7,36.0,36.0,0.172,2.07
