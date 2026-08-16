@@ -9,7 +9,7 @@ the reported results, in the interest of transparency and reproducibility.
   are reported as measured values across 3 independent training seeds.
 - Results supersede figures reported in earlier manuscript versions. During this revision the full
   pipeline was re-implemented and re-run rigorously; the corrected results are lower in magnitude
-  than earlier figures and are accompanied by characterisation of the method's limits
+  than earlier figures and are accompanied by honest characterisation of the method's limits
   (thermal saturation, no peak-demand reduction under a strict band, comfort–cost trade-off, and
   seed variance in the 20-zone extended case).
 - The simulation is a lumped-parameter RC thermal model (not EnergyPlus); the manuscript describes
@@ -19,7 +19,7 @@ the reported results, in the interest of transparency and reproducibility.
 
 ## Notes on interpretation
 
-- Reported savings are modest. The paper's contribution is framed as a realistic-
+- Reported savings are honest and modest. The paper's contribution is framed as a realistic-
   conditions characterisation of when tariff-aware coordination helps (and when it does not),
   rather than a maximal-savings claim.
 - Bills are computed from measured kWh via the Saudi two-tier tariff, so energy and cost are
