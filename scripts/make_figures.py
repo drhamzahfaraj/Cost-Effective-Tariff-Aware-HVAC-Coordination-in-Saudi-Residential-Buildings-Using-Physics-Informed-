@@ -8,7 +8,7 @@ Produces PNG versions of:
   3. Comfort violation magnitude by scenario (mean and max, bar chart)
   4. Daily power profile (villa, July) showing NO peak reduction under strict band
 
-These are honest visualisations built directly from the measured results, and can
+These are visualisations built directly from the measured results, and can
 also be used to embed figures in the Word manuscript copies.
 
 Usage:
@@ -74,7 +74,7 @@ plt.tight_layout()
 plt.savefig(os.path.join(FIGDIR, "comfort_violation_magnitude.png"), dpi=150)
 plt.close()
 
-# ---- Figure 4: daily power profile (honest: no peak reduction) ----
+# ---- Figure 4: daily power profile (no peak reduction) ----
 # Measured On/Off hourly profile (villa, July) -- both controllers peak at 9.0 kW.
 onoff_hourly = [3.6, 2.2, 2.7, 2.2, 3.6, 3.6, 2.7, 4.5, 5.4, 5.0, 5.8, 7.6,
                 8.1, 7.2, 8.1, 8.6, 8.1, 7.2, 8.1, 5.9, 6.8, 4.5, 4.5, 4.1]
