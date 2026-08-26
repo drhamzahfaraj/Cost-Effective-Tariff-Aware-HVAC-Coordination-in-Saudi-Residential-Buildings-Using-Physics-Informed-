@@ -20,7 +20,7 @@ executing the simulation and the reinforcement-learning training in `src/`.
   abstraction chosen for analytical tractability. The paper states this plainly and lists
   higher-fidelity validation as future work.
 
-The headline results are deliberately modest and are reported honestly (see §5).
+The headline results are deliberately modest (see §5).
 
 ---
 
@@ -84,7 +84,7 @@ Optional flags:
     ├── METHODS.md                # detailed method description
     ├── RESULTS.md                # the numbers, with interpretation
     ├── REPRODUCIBILITY.md        # how each table/figure maps to a command
-    └── CHANGELOG.md              # honest record of the correction history
+    └── CHANGELOG.md              # record of revisions
 ```
 
 ---
@@ -108,7 +108,7 @@ Full detail: `docs/METHODS.md`.
 
 ---
 
-## 5. Headline results (honest summary)
+## 5. Headline results
 
 | Scenario | Band | Cost reduction vs On/Off |
 |---|---|---|
@@ -118,7 +118,7 @@ Full detail: `docs/METHODS.md`.
 | 20-zone building, July | extended | ~7.8% (high seed variance) |
 | 5-zone villa, seasonal (strict) | Jan/Apr/Oct | 9.1% / 7.9% / 6.9% |
 
-**Honest caveats, stated up front:**
+**Caveats, stated up front:**
 - **Peak demand is not reduced under a strict band.** Both On/Off and PI-PPO peak identically,
   because the comfort constraint forces compressors on at peak. Savings come from energy and
   tariff-tier effects, not peak shaving.
