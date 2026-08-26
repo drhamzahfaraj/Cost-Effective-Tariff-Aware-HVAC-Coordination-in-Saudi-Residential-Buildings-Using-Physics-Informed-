@@ -1,0 +1,25 @@
+{
+  "provenance": "All values below are executed runs (rc_sim.py), not asserted. GS at k=n (unbinding). 20-zone non-July PI-PPO trained 500-2000 episodes, 1 seed (indicative); villa + 20-zone July PI-PPO are the 3-seed canonical values.",
+  "GS_baseline_kn": {
+    "villa": {
+      "January": -4.5,
+      "April": 0.0,
+      "July": 0.6,
+      "October": -1.3
+    },
+    "20zone": {
+      "January": -0.5,
+      "April": 0.2,
+      "July": 0.0,
+      "October": -0.9
+    }
+  },
+  "PIPPO_20zone_seasonal_strict_indicative": {
+    "January": -10.8,
+    "April": -13.4,
+    "July": 1.0,
+    "October": 0.1,
+    "note": "Non-July 20-zone strict PI-PPO does NOT beat On-Off even at 2000 episodes; the building is thermally saturated. Only July (canonical 1.0%) and villa scale show positive strict-band savings."
+  },
+  "verdict": "MPC-1/MPC-3/DQN: no implementation exists -> cannot be verified; remove or implement. 20-zone non-July positive savings (9.0/10.1/7.8%): NOT reproducible, contradicted by runs."
+}

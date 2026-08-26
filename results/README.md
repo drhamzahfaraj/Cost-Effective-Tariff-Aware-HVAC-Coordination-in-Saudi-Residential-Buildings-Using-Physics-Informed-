@@ -12,7 +12,7 @@ from measured kWh via the Saudi two-tier tariff, so energy and cost are consiste
 | `all_results.csv`        | The same results flattened to a single CSV (one row per scenario) for easy spreadsheet import. |
 | `seasonal_villa.csv`     | Villa seasonal breakdown (Jan/Apr/Jul/Oct) as CSV. |
 | `results_table.md`       | Human-readable table of all scenarios. |
-| `KEY_FINDINGS.md`        | The study's main honest findings in plain language. |
+| `KEY_FINDINGS.md`        | The study's main findings in plain language. |
 
 ## Headline numbers
 
@@ -35,7 +35,7 @@ This writes `results_generated.json` and `results_generated.md` next to the scri
 against `converged_results.json`. Small differences (a few tenths of a percent) are expected from
 stochastic training; the qualitative findings are stable.
 
-## Honest reporting notes
+## Reporting notes
 
 - **Peak demand is not reduced** under a strict band (On/Off and PI-PPO peak identically); savings
   come from energy and tariff-tier effects, not peak shaving.
