@@ -1,5 +1,5 @@
 """
-Honest RC-simulation environment for the PI-PPO study.
+RC-simulation environment for the PI-PPO study.
 
 This is a REAL, runnable multi-zone RC thermal simulation. It integrates the
 heat-balance ODE (Eq. 1) with inter-zone coupling over a 30-day month at 15-min

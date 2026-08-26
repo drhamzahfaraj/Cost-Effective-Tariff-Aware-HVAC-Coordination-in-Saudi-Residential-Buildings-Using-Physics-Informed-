@@ -1,9 +1,9 @@
 """
-Behaviour-cloning warm-start for the honest RC study.
+Behaviour-cloning warm-start for the RC study.
 
 The sibling codebase established that PPO from scratch settles into a bad local
 optimum (over-cycles, cost rises); the fix is to clone a dynamic-programming
-expert that DOES pre-cool, then fine-tune. This reproduces that honestly on the
+expert that DOES pre-cool, then fine-tune. This reproduces that on the
 real RC dynamics, so we measure PI-PPO's true best-case saving.
 
 Per-zone DP ignores coupling (a 2nd-order effect for a demonstration); PPO

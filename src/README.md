@@ -1,6 +1,6 @@
 # Source code
 
-This directory contains two equivalent implementations of the same honest RC-simulation
+This directory contains two equivalent implementations of the same RC-simulation
 PI-PPO pipeline. Both produce identical baselines and consistent results.
 
 ## Single-file version (recommended for reproduction)
@@ -34,7 +34,7 @@ as `simulator.py`, confirming the two implementations agree.
 
 This is a **lumped-parameter RC thermal simulation implemented in NumPy/PyTorch**. It does
 **not** use EnergyPlus, Sinergym, or any detailed building-physics engine. The paper describes
-the model accurately as such, and validation against a higher-fidelity simulator is stated as
+the model as such, and validation against a higher-fidelity simulator is stated as
 future work. (An earlier `environment.py` wrapper that referenced EnergyPlus/Sinergym was **not**
 part of the actual pipeline and has been removed; no module depends on it.)
 

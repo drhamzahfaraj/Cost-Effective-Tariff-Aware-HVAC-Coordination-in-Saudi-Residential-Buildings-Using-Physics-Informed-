@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-simulator.py -- Self-contained honest PI-PPO HVAC simulator.
+simulator.py -- Self-contained PI-PPO HVAC simulator.
 
 Everything (RC thermal model, tariff, baselines, DP expert, behaviour-cloning
 warm-start, PPO training, evaluation) is in this one file. No src/ folder,

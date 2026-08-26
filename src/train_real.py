@@ -1,5 +1,5 @@
 """
-Real PI-PPO training on the honest RC simulation.
+Real PI-PPO training on the RC simulation.
 
 Trains a PPO agent (physics-informed reward) against the RC dynamics in
 rc_sim.py, evaluates on a held-out rollout, and reports MEASURED savings vs
