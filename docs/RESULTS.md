@@ -20,7 +20,7 @@ The reference machine-readable copy is `results/converged_results.json`.
 **1. Strict-band savings are modest and near the physical optimum.**
 The 20-zone strict-band saving (~1.0%) is essentially the dynamic-programming optimum for a
 thermally saturated building: when cooling demand is near the units' capacity, there is almost no
-scheduling slack, so coordination cannot do much. This is an honest, useful boundary result.
+scheduling slack, so coordination cannot do much. This is a useful boundary result.
 
 **2. Comfort extension is the primary lever.**
 Widening the band from [23–25] to [22–26] roughly triples the villa saving (4.3% → 13.4%) and
@@ -41,7 +41,7 @@ Savings are larger in cooler/shoulder months (Jan 9.1%, Apr 7.9%, Oct 6.9%) than
 suggests better performance in cooler Saudi locations — a hypothesis for future testing, not a
 measured result here.
 
-## Honest reporting notes
+## Reporting notes
 
 - **Comfort:** we report violation *magnitude*, not just frequency. Mean violations are small
   (~0.04–0.18 °C) in cooling months; January is looser (0.73 °C mean) because there is little
