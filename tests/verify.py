@@ -14,7 +14,7 @@ Exit code 0 = checks passed; 1 = a check failed.
 
 Note: PI-PPO savings vary with the (short) training budget and seed; this test
 checks the On/Off baseline exactly and the PI-PPO reduction against a tolerant
-range, because the point is to confirm the pipeline is honest and runnable, not
+range, because the point is to confirm the pipeline is runnable, not
 to reproduce the full-run decimals (use `python src/simulator.py --full` for that).
 """
 import os, sys, json
@@ -77,7 +77,7 @@ def main():
     print(f"  paper full-run reference: {villa_strict['cost_reduction_pct']}%")
     # tolerant range: short training should land in roughly [1%, 8%]
     if 0.5 <= r["cost_reduction_pct"] <= 8.0:
-        print(f"  PASS (reduction in expected range for a modest, honest result)")
+        print(f"  PASS (reduction in expected range for a modest result)")
     else:
         print(f"  WARN (outside expected range; check training budget/seed)")
 
